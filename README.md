@@ -49,7 +49,7 @@
 
 ```
 ai-intern-比赛版/
-├── main.py                  主服务（原版 1271 → 1112 行）
+├── main.py                  主服务（原版 1271 → 1717 行）
 ├── auth_store.py            轻量账号、会话与个人记录（SQLite，无新增依赖）
 ├── config.py                集中配置层：模型、超时、阈值、缓存、重试
 ├── prompts.py               提示词集中层：通用与领域分离
@@ -71,12 +71,14 @@ ai-intern-比赛版/
 │   ├── llm_proxy.py         LLM 出站计量代理（对照测试用）
 │   ├── serve_original_via_proxy.py  让桌面原版不改一行地走代理
 │   └── run_compare.sh       一键起「代理 + 两版 + 对照」
-├── tests/                   pytest 用例（13 个文件，含 /review 最小端到端，默认跳过；
+├── tests/                   pytest 用例（15 个文件，含 /review 最小端到端，默认跳过；
 │                             其中 test_rule_library_guards.py 对真实规则库设防）
 ├── bench_local.py           本地检索耗时基准（不烧 token）
 ├── compare_before_after.py  改造前后端到端对照（调用次数由代理实测）
 ├── 改动说明.md              改动内容与实测数据
 ├── archive/                 与当前脚本不配套的历史产物（见其中 README）
+├── .env.example             环境变量模板（复制为 .env 后填写；.env 不入库）
+├── requirements.txt         运行依赖（UTF-8，已含 PyMuPDF / RapidOCR 等运行期包）
 ├── data/                    语料（未进 git）
 ├── chroma_db/               向量库（未进 git）
 ├── user_materials/          学生材料归档（未进 git，按用户隔离）
@@ -85,19 +87,80 @@ ai-intern-比赛版/
 
 ---
 
-## 运行方式
+## 快速开始
 
-复用桌面版已有的虚拟环境即可，不必重装那 4.3G 依赖：
+### 1. 环境要求
+
+| 项 | 要求 |
+|---|---|
+| Python | 3.10 或以上（实测 3.13） |
+| 磁盘 | 约 6 GB（PyTorch + 本地嵌入/精排模型） |
+| 网络 | 首次启动需联网下载模型（已默认走 hf-mirror 镜像） |
+| 模型服务 | 火山引擎方舟的 API Key + **你自己的**推理接入点 ID |
+
+### 2. 创建虚拟环境并安装依赖
+
+```bash
+python -m venv .venv
+
+# Windows (cmd)
+.venv\Scripts\activate
+# macOS / Linux
+source .venv/bin/activate
+
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+> **CPU 机器提速**：`requirements.txt` 中 `torch` 默认会装上体积很大的通用轮子。
+> 不需要 GPU 时可先单独装 CPU 版，再装其余依赖：
+> `pip install torch --index-url https://download.pytorch.org/whl/cpu`
+>
+> **国内网络**：`config.py` 已把 HuggingFace 端点默认指向 `hf-mirror.com`；
+> pip 慢的话可追加 `-i https://pypi.tuna.tsinghua.edu.cn/simple`。
+
+### 3. 配置密钥
+
+```bash
+cp .env.example .env        # Windows: copy .env.example .env
+```
+
+然后编辑 `.env`，至少填这两项（文件中已标注「必填」）：
+
+- `ARK_API_KEY` —— 方舟控制台「API Key 管理」创建；
+- `ARK_MODEL` —— 方舟控制台「在线推理 → 推理接入点」创建后得到的 ID（形如 `ep-…`）。
+
+> 不要留空直接跑：留空会退回 `config.py` 里的示例接入点，那属于原作者账号，调用会失败。
+
+### 4. 准备知识库（可选但建议）
+
+出于隐私与体积考虑，仓库**不含语料与向量库**（`data/`、`chroma_db/` 均被 `.gitignore` 忽略）。
+两种方式任选：
+
+- **批量**：把语料放进 `data/`，启动服务后用 `tools/batch_upload.py` 一次入库（见下文）；
+- **少量**：直接启动服务，在页面上传几份文档，边传边用。
+
+### 5. 启动
+
+```bash
+python -m uvicorn main:app --host 127.0.0.1 --port 8001
+```
+
+访问 http://127.0.0.1:8001/ 。首次启动约 1 分钟（需加载本地嵌入模型与精排模型），之后常驻。
+
+### 6. 登录
+
+首次启动会自动创建三个演示账号，默认密码均为 `Demo@123456`，角色权限见下表。
+
+### 复用作者本机已有的虚拟环境（仅限本机）
+
+原开发机上已有一个装好全部依赖的虚拟环境，在这台机器上可跳过第 2 步：
 
 ```bash
 VENV="C:/Users/21003/Desktop/ai-intern/.venv/Scripts/python.exe"
 
 $VENV -m uvicorn main:app --host 127.0.0.1 --port 8001
 ```
-
-访问 http://127.0.0.1:8001/
-
-首次启动约 1 分钟（需加载本地嵌入模型与精排模型），之后常驻。
 
 ### 登录与角色
 
@@ -265,7 +328,7 @@ python -c "import prompts; print(prompts.answer_system_prompt('X','2026年09月3
 
 详见 [`改动说明.md`](改动说明.md) 第七、八节。摘要：
 
-- `main.py` 仍是单文件（1112 行）。审查规则引擎已拆到 `review_engine.py`，
+- `main.py` 仍是单文件（1717 行）。审查规则引擎已拆到 `review_engine.py`，
   其余部分（文档解析、检索、路由）尚未拆分
 - BM25 索引全量重建期间，并发问答可能读到中间状态。当前百级片段影响可忽略，
   上万片段需改增量索引或加读写锁
