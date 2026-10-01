@@ -1,0 +1,2364 @@
+{
+  "version": "2.0",
+  "generated_at": "2026-10-01T20:51:03+08:00",
+  "domains": {
+    "综合素质测评": {
+      "rules": [
+        {
+          "id": "综合素质测评_R001",
+          "name": "体质测试成绩不低于80分",
+          "type": "range",
+          "field": "体质测试成绩",
+          "min": 80,
+          "severity": "critical",
+          "message": "体质测试成绩未达到80分，不符合评优评奖条件",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "综合素质测评_R002",
+          "name": "品德素质测评不低于80分",
+          "type": "range",
+          "field": "品德素质测评得分",
+          "min": 80,
+          "severity": "critical",
+          "message": "品德素质测评得分未达到80分（含80分），不能申请各类奖学金",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "综合素质测评_R003",
+          "name": "无挂科方可参评奖学金",
+          "type": "status",
+          "field": "挂科记录",
+          "pass_values": [
+            "无挂科",
+            "没有挂科",
+            "未挂科"
+          ],
+          "fail_values": [
+            "存在挂科",
+            "有挂科",
+            "挂科课程"
+          ],
+          "severity": "critical",
+          "message": "存在挂科课程（公选课、重修课除外），不予参评奖学金",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "综合素质测评_R004",
+          "name": "总积分权重计算正确",
+          "type": "keyword",
+          "field": "总积分计算公式",
+          "keywords": [
+            "D×8%",
+            "X×65%",
+            "C×15%",
+            "S×7%",
+            "W×5%"
+          ],
+          "severity": "error",
+          "message": "总积分计算公式不符合 P=D×8%＋X×65%＋C×15%＋S×7%+W×5%",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "综合素质测评_R005",
+          "name": "品德分计算公式正确",
+          "type": "keyword",
+          "field": "品德表现评价得分",
+          "keywords": [
+            "D=D1+D2-D3"
+          ],
+          "severity": "error",
+          "message": "品德分计算公式不符合 D=D1+D2-D3",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "综合素质测评_R006",
+          "name": "品德基本分不超90分",
+          "type": "range",
+          "field": "品德基本分",
+          "max": 90,
+          "severity": "error",
+          "message": "品德基本分 D1 超过满分 90 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R007",
+          "name": "品德加分不超10分",
+          "type": "range",
+          "field": "品德加分",
+          "max": 10,
+          "severity": "error",
+          "message": "品德加分 D2 超过最高 10 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R008",
+          "name": "品德扣分不超80分",
+          "type": "range",
+          "field": "品德扣分",
+          "max": 80,
+          "severity": "error",
+          "message": "品德扣分 D3 累计超过 80 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R009",
+          "name": "学业成绩按首次考试算",
+          "type": "keyword",
+          "field": "学业成绩",
+          "keywords": [
+            "首次考试"
+          ],
+          "severity": "error",
+          "message": "课程成绩未按学生首次考试取得的课程成绩计算",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R010",
+          "name": "英语四级加1分",
+          "type": "range",
+          "field": "英语四级加分",
+          "min": 1,
+          "max": 1,
+          "severity": "error",
+          "message": "通过全国大学英语四级考试应加 1 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R011",
+          "name": "英语六级加2分",
+          "type": "range",
+          "field": "英语六级加分",
+          "min": 2,
+          "max": 2,
+          "severity": "error",
+          "message": "通过全国大学英语六级考试应加 2 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R012",
+          "name": "计算机四级每科加1分",
+          "type": "range",
+          "field": "计算机等级考试四级加分",
+          "min": 1,
+          "severity": "error",
+          "message": "通过全国计算机等级考试四级各科目，每科应加 1 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R013",
+          "name": "创新实践评价满分100",
+          "type": "range",
+          "field": "创新实践评价得分",
+          "max": 100,
+          "severity": "error",
+          "message": "创新实践评价得分超过满分 100 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R014",
+          "name": "创新实践加分不超80",
+          "type": "range",
+          "field": "创新实践加分",
+          "max": 80,
+          "severity": "error",
+          "message": "创新实践加分 C2 超过 80 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R015",
+          "name": "创新团队加分范围",
+          "type": "range",
+          "field": "创新团队加分",
+          "min": 0.5,
+          "max": 1,
+          "severity": "error",
+          "message": "参与创新团队工作加分应在 0.5～1 分之间",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R016",
+          "name": "社会实践评价满分100",
+          "type": "range",
+          "field": "社会实践评价得分",
+          "max": 100,
+          "severity": "error",
+          "message": "社会实践评价得分超过满分 100 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R017",
+          "name": "学生工作加分不超40",
+          "type": "range",
+          "field": "学生工作加分",
+          "max": 40,
+          "severity": "error",
+          "message": "学生工作加分 S1 超过 40 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R018",
+          "name": "社会服务加分不超40",
+          "type": "range",
+          "field": "社会服务加分",
+          "max": 40,
+          "severity": "error",
+          "message": "社会服务加分 S2 超过 40 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R019",
+          "name": "第二课堂时长至少60",
+          "type": "range",
+          "field": "第二课堂总时长",
+          "min": 60,
+          "severity": "error",
+          "message": "学生每年须参加学校第二课堂活动至少 60 小时",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "综合素质测评_R020",
+          "name": "理想信念时长不低于5",
+          "type": "range",
+          "field": "理想信念时长",
+          "min": 5,
+          "severity": "error",
+          "message": "理想信念时长低于 5 小时",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "综合素质测评_R021",
+          "name": "文体艺术时长不低于5",
+          "type": "range",
+          "field": "文体艺术时长",
+          "min": 5,
+          "severity": "error",
+          "message": "文体艺术时长低于 5 小时",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "综合素质测评_R022",
+          "name": "实践志愿时长不低于5",
+          "type": "range",
+          "field": "实践志愿时长",
+          "min": 5,
+          "severity": "error",
+          "message": "实践志愿时长低于 5 小时",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "综合素质测评_R023",
+          "name": "双创实训时长不低于2",
+          "type": "range",
+          "field": "双创实训时长",
+          "min": 2,
+          "severity": "error",
+          "message": "双创实训时长低于 2 小时",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "综合素质测评_R024",
+          "name": "校园建设时长不低于2",
+          "type": "range",
+          "field": "校园建设时长",
+          "min": 2,
+          "severity": "error",
+          "message": "校园建设时长低于 2 小时",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "综合素质测评_R025",
+          "name": "社会服务单日最高8小时",
+          "type": "range",
+          "field": "社会服务单日时长",
+          "max": 8,
+          "severity": "error",
+          "message": "参加社会服务 1 天最高按 8 小时计算",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R026",
+          "name": "学生干部兼任只计最高",
+          "type": "keyword",
+          "field": "学生干部职务",
+          "keywords": [
+            "最高分",
+            "兼任"
+          ],
+          "severity": "error",
+          "message": "学生干部兼任多个职务的，只计最高分一项",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R027",
+          "name": "学生干部任期未满按50%",
+          "type": "range",
+          "field": "学生干部任期",
+          "min": 0.5,
+          "max": 1,
+          "severity": "error",
+          "message": "任期未满一学年但已满一学期的，按 50% 计分；未满一学期不予加分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R028",
+          "name": "同一项目只取最高分",
+          "type": "keyword",
+          "field": "获奖项目",
+          "keywords": [
+            "最高分"
+          ],
+          "severity": "error",
+          "message": "同一项目获得不同等级奖励的，取最高得分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R029",
+          "name": "三大索引论文加20",
+          "type": "range",
+          "field": "三大索引论文加分",
+          "min": 20,
+          "max": 20,
+          "severity": "error",
+          "message": "三大索引（SCI、EI、ISTP）论文应加 20 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R030",
+          "name": "中文核心期刊加15",
+          "type": "range",
+          "field": "中文核心期刊加分",
+          "min": 15,
+          "max": 15,
+          "severity": "error",
+          "message": "中文核心期刊论文应加 15 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R031",
+          "name": "CN刊号期刊加5",
+          "type": "range",
+          "field": "CN刊号期刊加分",
+          "min": 5,
+          "max": 5,
+          "severity": "error",
+          "message": "有 CN 刊号的正式期刊论文应加 5 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R032",
+          "name": "发明专利个人加10",
+          "type": "range",
+          "field": "发明专利个人加分",
+          "min": 10,
+          "max": 10,
+          "severity": "error",
+          "message": "发明专利个人项目获得者应加 10 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R033",
+          "name": "国家级项目负责人加20",
+          "type": "range",
+          "field": "国家级项目负责人加分",
+          "min": 20,
+          "max": 20,
+          "severity": "error",
+          "message": "国家级创新创业项目负责人应加 20 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R034",
+          "name": "省级项目负责人加8",
+          "type": "range",
+          "field": "省级项目负责人加分",
+          "min": 8,
+          "max": 8,
+          "severity": "error",
+          "message": "省级创新创业项目负责人应加 8 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R035",
+          "name": "校级项目负责人加4",
+          "type": "range",
+          "field": "校级项目负责人加分",
+          "min": 4,
+          "max": 4,
+          "severity": "error",
+          "message": "校级创新创业项目负责人应加 4 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R036",
+          "name": "院级项目负责人加1.5",
+          "type": "range",
+          "field": "院级项目负责人加分",
+          "min": 1.5,
+          "max": 1.5,
+          "severity": "error",
+          "message": "院级创新创业项目负责人应加 1.5 分",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R037",
+          "name": "品德基本分构成比例",
+          "type": "keyword",
+          "field": "品德基本分测评构成",
+          "keywords": [
+            "20%",
+            "40%",
+            "40%"
+          ],
+          "severity": "error",
+          "message": "品德基本分 D1 应由个人自评 20%、班评议小组 40%、班主任或辅导员 40% 构成",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R038",
+          "name": "免测学生仍可评优",
+          "type": "keyword",
+          "field": "体质测试评价",
+          "keywords": [
+            "免测"
+          ],
+          "severity": "warning",
+          "message": "体质测试评价为免测的学生，仍可参加评优评奖",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "综合素质测评_R039",
+          "name": "同级别英语考试只加一次",
+          "type": "keyword",
+          "field": "英语等级考试加分",
+          "keywords": [
+            "多次通过",
+            "只加一次"
+          ],
+          "severity": "error",
+          "message": "大学期间多次通过同级别英语考试的，只能加一次",
+          "scene": [
+            "申请表"
+          ]
+        },
+        {
+          "id": "综合素质测评_R040",
+          "name": "不及格课程绩点为0",
+          "type": "range",
+          "field": "不及格课程绩点",
+          "min": 0,
+          "max": 0,
+          "severity": "error",
+          "message": "不及格课程和重修、补考通过的课程绩点数为 0",
+          "scene": [
+            "申请表"
+          ]
+        }
+      ],
+      "source_docs": [
+        "【学院综测细则】广东工业大学计算机学院2025-2026年度本科学生综合素质测评实施细则(1)(1).pdf",
+        "计算机学院2025级综测评定佐证材料(1).doc"
+      ]
+    },
+    "考试报名管理": {
+      "rules": [
+        {
+          "id": "考试报名管理_R001",
+          "name": "通知必须包含考试时间",
+          "type": "required",
+          "field": "考试时间",
+          "severity": "error",
+          "message": "通知缺少考试时间（口试/笔试），信息不完整",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R002",
+          "name": "通知必须包含报名资格",
+          "type": "required",
+          "field": "报名资格",
+          "severity": "error",
+          "message": "通知缺少报名资格说明，信息不完整",
+          "scene": [
+            "通知公告",
+            "资格审查"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R003",
+          "name": "通知必须包含报名时间及方式",
+          "type": "required",
+          "field": "报名时间及方式",
+          "severity": "error",
+          "message": "通知缺少报名时间或报名方式，信息不完整",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R004",
+          "name": "通知必须包含缴费标准",
+          "type": "required",
+          "field": "缴费标准",
+          "severity": "error",
+          "message": "通知缺少缴费标准，信息不完整",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R005",
+          "name": "通知必须包含准考证打印时间",
+          "type": "required",
+          "field": "准考证打印时间",
+          "severity": "error",
+          "message": "通知缺少准考证打印时间，信息不完整",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R006",
+          "name": "通知必须包含成绩报告单说明",
+          "type": "required",
+          "field": "成绩报告单说明",
+          "severity": "error",
+          "message": "通知缺少成绩报告单说明，信息不完整",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R007",
+          "name": "通知必须包含残疾考生便利安排",
+          "type": "required",
+          "field": "残疾考生合理便利申请",
+          "severity": "error",
+          "message": "通知缺少残疾考生合理便利申请安排",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R008",
+          "name": "通知必须包含各校区联系方式",
+          "type": "keyword",
+          "field": "联系方式",
+          "keywords": [
+            "大学城校区",
+            "龙洞校区",
+            "东风路校区",
+            "番禺校区",
+            "揭阳校区"
+          ],
+          "severity": "error",
+          "message": "通知缺少部分校区教务办联系人及联系电话",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R009",
+          "name": "通知落款需含发文单位及日期",
+          "type": "required",
+          "field": "落款",
+          "severity": "critical",
+          "message": "通知缺少发文单位（教务处）或成文日期，落款不完整",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R010",
+          "name": "日期中的日必须两位数字",
+          "type": "regex",
+          "field": "日期中的日",
+          "pattern": "^(0[1-9]|[12][0-9]|3[01])日$",
+          "severity": "error",
+          "message": "日期中的“日”必须为两位数字，如01日、08日、09日、15日、31日；不能写成1日、8日、9日",
+          "scene": [
+            "通用"
+          ],
+          "condition": "校验日期字符串中“日”部分"
+        },
+        {
+          "id": "考试报名管理_R011",
+          "name": "报名网址必须为正确半角连字符",
+          "type": "regex",
+          "field": "报名网址",
+          "pattern": "^https?://cet-bm\\.neea\\.edu\\.cn/?$",
+          "severity": "error",
+          "message": "报名网址应为 https://cet-bm.neea.edu.cn/，域名中的连字符应为半角 -，不能使用全角/长破折号 —",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R012",
+          "name": "成绩查询网址必须为官方网址",
+          "type": "regex",
+          "field": "成绩查询网址",
+          "pattern": "^https?://www\\.neea\\.edu\\.cn/?$",
+          "severity": "error",
+          "message": "成绩查询网址应为 http://www.neea.edu.cn",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R013",
+          "name": "报名平台咨询电话格式正确",
+          "type": "regex",
+          "field": "报名平台咨询电话",
+          "pattern": "^010-62987880$",
+          "severity": "error",
+          "message": "报名平台咨询电话应为 010-62987880，使用半角连字符，不能写成 010—62987880",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R014",
+          "name": "六级报考需四级成绩达425分",
+          "type": "range",
+          "field": "四级笔试成绩",
+          "min": 425,
+          "severity": "critical",
+          "message": "四级笔试成绩低于425分，不符合六级报考资格",
+          "scene": [
+            "资格审查"
+          ],
+          "condition": "报考六级时"
+        },
+        {
+          "id": "考试报名管理_R015",
+          "name": "四级与六级不得同时报考",
+          "type": "keyword",
+          "field": "报名限制",
+          "keywords": [
+            "四级和六级不能同时报考"
+          ],
+          "severity": "error",
+          "message": "缺少或违反“四级和六级不能同时报考”限制",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R016",
+          "name": "口试须先完成对应笔试报名",
+          "type": "keyword",
+          "field": "口试报名条件",
+          "keywords": [
+            "完成对应级别笔试报名"
+          ],
+          "severity": "error",
+          "message": "口试报名条件缺少“完成对应级别笔试报名”前置要求",
+          "scene": [
+            "资格审查",
+            "通知公告"
+          ],
+          "condition": "报考口试时"
+        },
+        {
+          "id": "考试报名管理_R017",
+          "name": "报名对象限定为在校生",
+          "type": "keyword",
+          "field": "报名对象",
+          "keywords": [
+            "全日制本科生",
+            "在籍研究生"
+          ],
+          "severity": "error",
+          "message": "报名对象未限定为我校在校生（含全日制本科生、在籍研究生）",
+          "scene": [
+            "资格审查",
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R018",
+          "name": "报名起止时间及逾期说明完整",
+          "type": "keyword",
+          "field": "报名时间",
+          "keywords": [
+            "3月19日12:00",
+            "4月2日17:00",
+            "不再补报"
+          ],
+          "severity": "error",
+          "message": "通知缺少完整报名起止时间或逾期不补报说明",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R019",
+          "name": "缴费时限不超过24小时",
+          "type": "range",
+          "field": "缴费时限",
+          "max": 24,
+          "unit": "小时",
+          "severity": "error",
+          "message": "报名成功后超过24小时未缴费，不符合缴费时限要求",
+          "scene": [
+            "资格审查",
+            "通知公告"
+          ],
+          "condition": "报名成功后"
+        },
+        {
+          "id": "考试报名管理_R020",
+          "name": "报名照片必须为jpg格式",
+          "type": "regex",
+          "field": "照片格式",
+          "pattern": "^jpg$",
+          "severity": "error",
+          "message": "报名照片必须为jpg格式",
+          "scene": [
+            "资格审查"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R021",
+          "name": "报名照片大小不超过50KB",
+          "type": "range",
+          "field": "照片大小",
+          "max": 50,
+          "unit": "KB",
+          "severity": "error",
+          "message": "报名照片大于50KB，不符合不大于50KB的要求",
+          "scene": [
+            "资格审查"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R022",
+          "name": "报名照片尺寸须为480*640",
+          "type": "enum",
+          "field": "照片尺寸",
+          "enum": [
+            "480*640"
+          ],
+          "severity": "error",
+          "message": "报名照片尺寸应为480*640",
+          "scene": [
+            "资格审查"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R023",
+          "name": "报名照片须以学号命名",
+          "type": "regex",
+          "field": "照片文件名",
+          "pattern": "^\\d+\\.jpg$",
+          "severity": "error",
+          "message": "报名照片须以学号命名，格式为学号.jpg",
+          "scene": [
+            "资格审查"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R024",
+          "name": "考试费用标准需完整准确",
+          "type": "keyword",
+          "field": "考试费用标准",
+          "keywords": [
+            "36元/人次",
+            "50元/人次"
+          ],
+          "severity": "error",
+          "message": "考试费用标准缺失或不是笔试36元/人次、口试50元/人次",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R025",
+          "name": "纸质成绩单申请不超10个工作日",
+          "type": "range",
+          "field": "纸质成绩单申请时限",
+          "max": 10,
+          "unit": "工作日",
+          "severity": "error",
+          "message": "纸质成绩报告单申请应在成绩发布后10个工作日内，超出时限不符合要求",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": "申请纸质成绩报告单时"
+        },
+        {
+          "id": "考试报名管理_R026",
+          "name": "口试准考证打印时间需完整",
+          "type": "keyword",
+          "field": "口试准考证打印时间",
+          "keywords": [
+            "5月19日9时后"
+          ],
+          "severity": "error",
+          "message": "通知缺少口试准考证打印时间（5月19日9时后）",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R027",
+          "name": "笔试准考证打印时间需完整",
+          "type": "keyword",
+          "field": "笔试准考证打印时间",
+          "keywords": [
+            "6月5日9时后"
+          ],
+          "severity": "error",
+          "message": "通知缺少笔试准考证打印时间（6月5日9时后）",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R028",
+          "name": "残疾考生申请截止时间需完整",
+          "type": "keyword",
+          "field": "残疾考生合理便利申请截止时间",
+          "keywords": [
+            "4月1日",
+            "16：00前"
+          ],
+          "severity": "error",
+          "message": "残疾考生合理便利申请缺少截止时间（4月1日16：00前）",
+          "scene": [
+            "通知公告",
+            "申请表"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R029",
+          "name": "残疾考生申请材料需齐全",
+          "type": "keyword",
+          "field": "残疾考生申请材料",
+          "keywords": [
+            "身份证",
+            "残疾人证"
+          ],
+          "severity": "error",
+          "message": "残疾考生合理便利申请材料缺少身份证或残疾人证要求",
+          "scene": [
+            "申请表",
+            "资格审查"
+          ],
+          "condition": null
+        },
+        {
+          "id": "考试报名管理_R030",
+          "name": "缴费方式需支持网银或支付宝",
+          "type": "keyword",
+          "field": "缴费方式",
+          "keywords": [
+            "网银",
+            "支付宝"
+          ],
+          "severity": "warning",
+          "message": "通知未明确支持网银或支付宝缴费",
+          "scene": [
+            "通知公告"
+          ],
+          "condition": null
+        }
+      ],
+      "source_docs": [
+        "关于2026年上半年全国大学英语四、六级笔试及口试报名的通知.txt"
+      ]
+    },
+    "四六级考试报名": {
+      "rules": [
+        {
+          "id": "四六级考试报名_R001",
+          "name": "考试时间必须完整准确",
+          "type": "keyword",
+          "field": "考试时间",
+          "keywords": [
+            "2026年11月21日",
+            "2026年11月22日",
+            "2026年12月12日",
+            "9:00-11:20",
+            "15:00-17:25"
+          ],
+          "severity": "error",
+          "message": "考试时间缺失或不完整，必须包含口试和笔试的具体日期和时间段",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R002",
+          "name": "报名时间范围必须明确",
+          "type": "keyword",
+          "field": "报名时间",
+          "keywords": [
+            "9月15日12:00",
+            "9月28日17:00"
+          ],
+          "severity": "error",
+          "message": "报名时间缺失或不准确，应为9月15日12:00至9月28日17:00",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R003",
+          "name": "六级报考四级成绩要求",
+          "type": "range",
+          "field": "四级成绩",
+          "min": 425,
+          "severity": "error",
+          "message": "六级报考要求四级笔试成绩达425分及以上",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R004",
+          "name": "四级六级不得同时报考",
+          "type": "keyword",
+          "field": "报考科目",
+          "keywords": [
+            "英语四级与英语六级不得同时报考"
+          ],
+          "severity": "error",
+          "message": "缺少英语四级与英语六级不得同时报考的规定",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R005",
+          "name": "口试须先报对应级别笔试",
+          "type": "keyword",
+          "field": "口试报考条件",
+          "keywords": [
+            "对应级别笔试报名"
+          ],
+          "severity": "error",
+          "message": "口试报考条件缺失，必须明确须完成对应级别笔试报名",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R006",
+          "name": "口语考点按学籍安排",
+          "type": "keyword",
+          "field": "口语考点",
+          "keywords": [
+            "大学城校区",
+            "揭阳校区",
+            "龙洞校区",
+            "东风路校区",
+            "番禺校区"
+          ],
+          "severity": "error",
+          "message": "口语考点安排缺失或不完整，必须包含各校区对应考点规则",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R007",
+          "name": "缴费须在24小时内完成",
+          "type": "keyword",
+          "field": "缴费时限",
+          "keywords": [
+            "24小时内缴费"
+          ],
+          "severity": "error",
+          "message": "缺少报名成功后24小时内缴费的要求",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R008",
+          "name": "考试费用标准必须明确",
+          "type": "enum",
+          "field": "考试费用",
+          "enum": [
+            "36元/人次",
+            "50元/人次"
+          ],
+          "severity": "error",
+          "message": "考试费用标准缺失或错误，应为CET4/6笔试36元/人次，CET-SET50元/人次",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R009",
+          "name": "残疾考生申请截止时间",
+          "type": "keyword",
+          "field": "残疾考生合理便利申请",
+          "keywords": [
+            "9月25日16:00前"
+          ],
+          "severity": "error",
+          "message": "残疾考生合理便利申请截止时间缺失或错误，应为9月25日16:00前",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R010",
+          "name": "准考证打印时间必须明确",
+          "type": "keyword",
+          "field": "准考证打印时间",
+          "keywords": [
+            "11月17日9时后",
+            "12月1日9时后"
+          ],
+          "severity": "error",
+          "message": "准考证打印时间缺失或不完整，口试为11月17日9时后，笔试为12月1日9时后",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R011",
+          "name": "电子成绩报告单替代说明",
+          "type": "keyword",
+          "field": "成绩报告单",
+          "keywords": [
+            "不再印发纸质成绩报告单",
+            "电子成绩报告单"
+          ],
+          "severity": "warning",
+          "message": "缺少电子成绩报告单替代纸质报告单的说明",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R012",
+          "name": "报名网址必须准确无误",
+          "type": "keyword",
+          "field": "报名网址",
+          "keywords": [
+            "https://cet-bm.neea.edu.cn/"
+          ],
+          "severity": "error",
+          "message": "报名网址缺失或错误，应为https://cet-bm.neea.edu.cn/",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R013",
+          "name": "发文单位必须明确标注",
+          "type": "keyword",
+          "field": "发文单位",
+          "keywords": [
+            "教务处"
+          ],
+          "severity": "error",
+          "message": "缺少发文单位（教务处）",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R014",
+          "name": "发文日期格式必须正确",
+          "type": "regex",
+          "field": "发文日期",
+          "pattern": "^2026年9月12日$",
+          "severity": "error",
+          "message": "发文日期缺失或格式错误，应为2026年9月12日",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R015",
+          "name": "引用文件编号必须完整",
+          "type": "keyword",
+          "field": "引用文件",
+          "keywords": [
+            "粤考院函〔2026〕62号"
+          ],
+          "severity": "warning",
+          "message": "缺少引用文件编号粤考院函〔2026〕62号",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R016",
+          "name": "各校区联系方式必须完整",
+          "type": "required",
+          "field": "各校区教务办联系方式",
+          "severity": "error",
+          "message": "缺少各校区教务办联系方式",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R017",
+          "name": "报名平台咨询电话正确",
+          "type": "regex",
+          "field": "报名平台咨询电话",
+          "pattern": "^010-62987880$",
+          "severity": "warning",
+          "message": "报名平台咨询电话缺失或错误，应为010-62987880",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R018",
+          "name": "考生注册使用个人邮箱",
+          "type": "keyword",
+          "field": "考生注册",
+          "keywords": [
+            "个人邮箱注册"
+          ],
+          "severity": "warning",
+          "message": "缺少考生使用个人邮箱注册账号的说明",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R019",
+          "name": "信息核对及更正时限",
+          "type": "keyword",
+          "field": "信息核对",
+          "keywords": [
+            "缴费前",
+            "更正"
+          ],
+          "severity": "error",
+          "message": "缺少信息错误或照片模糊须在缴费前到教务办公室更正的要求",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "四六级考试报名_R020",
+          "name": "成绩查询网址必须正确",
+          "type": "keyword",
+          "field": "成绩查询网址",
+          "keywords": [
+            "https://www.neea.edu.cn/"
+          ],
+          "severity": "warning",
+          "message": "缺少或错误的成绩查询网址，应为https://www.neea.edu.cn/",
+          "scene": [
+            "通知公告"
+          ]
+        }
+      ],
+      "source_docs": [
+        "关于2026年下半年全国大学英语四、六级笔试及口试报名的通知.txt"
+      ]
+    },
+    "学科竞赛管理": {
+      "rules": [
+        {
+          "id": "学科竞赛管理_R001",
+          "name": "标题须包含大赛完整全称",
+          "type": "keyword",
+          "field": "标题",
+          "keywords": [
+            "外研社·国才杯",
+            "理解当代中国",
+            "全国大学生外语能力大赛"
+          ],
+          "severity": "critical",
+          "message": "标题未包含“外研社·国才杯”“理解当代中国”全国大学生外语能力大赛完整名称",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R002",
+          "name": "校赛举办主体须明确",
+          "type": "keyword",
+          "field": "正文",
+          "keywords": [
+            "广东工业大学校赛"
+          ],
+          "severity": "error",
+          "message": "正文未明确为广东工业大学校赛",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R003",
+          "name": "报名截止时间须明确且不得缺失",
+          "type": "keyword",
+          "field": "报名截止时间",
+          "keywords": [
+            "9月14日24:00前"
+          ],
+          "severity": "critical",
+          "message": "未明确报名截止时间为9月14日24:00前",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R004",
+          "name": "参赛报名须以广工为单位集体报名",
+          "type": "keyword",
+          "field": "报名方式",
+          "keywords": [
+            "以广工为单位",
+            "集体报名参赛"
+          ],
+          "severity": "error",
+          "message": "未规定所有参赛者须以广工为单位集体报名参赛",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R005",
+          "name": "报名官网链接须正确且可访问",
+          "type": "regex",
+          "field": "报名官网链接",
+          "pattern": "^https://ucc\\.fltrp\\.com$",
+          "severity": "error",
+          "message": "报名官网链接缺失或不是 https://ucc.fltrp.com",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R006",
+          "name": "英语组参赛资格须完整",
+          "type": "keyword",
+          "field": "参赛资格",
+          "keywords": [
+            "全日制在校本科生",
+            "硕士研究生",
+            "来华留学生"
+          ],
+          "severity": "error",
+          "message": "英语组参赛资格未同时列明全日制在校本科生、硕士研究生和来华留学生",
+          "scene": [
+            "通知公告",
+            "资格审查"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R007",
+          "name": "日语组参赛资格须完整",
+          "type": "keyword",
+          "field": "参赛资格",
+          "keywords": [
+            "日语组",
+            "全日制在校本科生",
+            "硕士研究生"
+          ],
+          "severity": "error",
+          "message": "日语组参赛资格未列明全日制在校本科生和硕士研究生",
+          "scene": [
+            "通知公告",
+            "资格审查"
+          ],
+          "condition": "日语组"
+        },
+        {
+          "id": "学科竞赛管理_R008",
+          "name": "校赛组别须设英语日语",
+          "type": "keyword",
+          "field": "校赛组别",
+          "keywords": [
+            "英语组",
+            "日语组"
+          ],
+          "severity": "error",
+          "message": "校赛组别未明确设置英语组和日语组",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R009",
+          "name": "英语组须含四个分赛项",
+          "type": "keyword",
+          "field": "校赛安排",
+          "keywords": [
+            "国际传播综合能力赛项",
+            "笔译赛项",
+            "短视频赛项",
+            "“四新”专项赛"
+          ],
+          "severity": "error",
+          "message": "英语组校赛安排未完整列明国际传播综合能力、笔译、短视频、“四新”专项四个分赛项",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R010",
+          "name": "奖项比例须按金银铜设置",
+          "type": "regex",
+          "field": "奖项设置",
+          "pattern": "5[%％].*15[%％].*25[%％]",
+          "severity": "error",
+          "message": "金奖、银奖、铜奖人数比例未按5%、15%、25%设置",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R011",
+          "name": "获奖证书推送方式须明确",
+          "type": "keyword",
+          "field": "奖项设置",
+          "keywords": [
+            "获奖证书",
+            "邮箱",
+            "电子凭证库"
+          ],
+          "severity": "warning",
+          "message": "未说明获奖证书推送至邮箱及电子凭证库",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R012",
+          "name": "省赛晋级培训要求须明确",
+          "type": "keyword",
+          "field": "参加省赛",
+          "keywords": [
+            "指导老师",
+            "赛前强化培训",
+            "代表广东工业大学"
+          ],
+          "severity": "warning",
+          "message": "未明确晋级省赛选手接受指导老师赛前强化培训并代表广东工业大学参赛",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R013",
+          "name": "分赛项负责人须完整列明",
+          "type": "keyword",
+          "field": "联系方式",
+          "keywords": [
+            "负责人",
+            "联系方式"
+          ],
+          "severity": "error",
+          "message": "未列明各分赛项负责人及其联系方式",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R014",
+          "name": "负责人手机号须为11位",
+          "type": "regex",
+          "field": "负责人联系方式",
+          "pattern": "1[3-9]\\d{9}",
+          "severity": "error",
+          "message": "负责人联系方式缺少11位手机号或手机号格式不正确",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R015",
+          "name": "揭阳校区负责人须列明",
+          "type": "keyword",
+          "field": "联系方式",
+          "keywords": [
+            "揭阳校区",
+            "负责人"
+          ],
+          "severity": "warning",
+          "message": "未列明揭阳校区赛事负责人及联系方式",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R016",
+          "name": "附件五个参赛指南须齐全",
+          "type": "keyword",
+          "field": "附件",
+          "keywords": [
+            "附件",
+            "英语组国际传播综合能力赛项",
+            "英语组笔译赛项",
+            "英语组短视频赛项",
+            "英语组“四新”专项赛",
+            "日语赛项"
+          ],
+          "severity": "error",
+          "message": "附件未完整列明五个分赛项校赛参赛指南",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R017",
+          "name": "发文单位落款须齐全不得缺失",
+          "type": "keyword",
+          "field": "落款",
+          "keywords": [
+            "教务处",
+            "校团委",
+            "创新创业学院",
+            "外国语学院"
+          ],
+          "severity": "critical",
+          "message": "发文单位落款不齐全，缺少教务处、校团委、创新创业学院或外国语学院",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R018",
+          "name": "发文日期须完整含年月日",
+          "type": "required",
+          "field": "发文日期",
+          "severity": "error",
+          "message": "缺少完整发文日期（年月日）",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R019",
+          "name": "日期日必须写成两位数字",
+          "type": "regex",
+          "field": "日期",
+          "pattern": "^(0[1-9]|[12][0-9]|3[01])日$",
+          "severity": "error",
+          "message": "日期中的“日”必须写成两位数字，例如08日、09日、15日、31日；不要写成8日、9日",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R020",
+          "name": "赛事采用校省国三级赛制",
+          "type": "keyword",
+          "field": "大赛赛制",
+          "keywords": [
+            "校赛",
+            "省赛",
+            "国赛"
+          ],
+          "severity": "warning",
+          "message": "未说明采用校赛、省赛、国赛三级赛制",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R021",
+          "name": "报名指南微信链接须提供",
+          "type": "keyword",
+          "field": "正文",
+          "keywords": [
+            "官网报名指南链接",
+            "https://mp.weixin.qq.com/s/ypW2UYGV3pTPeNZAUcRFYg"
+          ],
+          "severity": "warning",
+          "message": "未提供官网报名指南微信链接或链接不完整",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R022",
+          "name": "备赛资源英语日语链接须提供",
+          "type": "keyword",
+          "field": "正文",
+          "keywords": [
+            "英语组备赛资源",
+            "日语组备赛资源",
+            "https://heep-jczt.fltrp.com/ucc-resources/"
+          ],
+          "severity": "warning",
+          "message": "未提供英语组和日语组备赛资源链接",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R023",
+          "name": "个人信息真实性要求须声明",
+          "type": "keyword",
+          "field": "正文",
+          "keywords": [
+            "个人信息",
+            "准确",
+            "真实",
+            "取消其参赛资格"
+          ],
+          "severity": "error",
+          "message": "未声明参赛选手注册个人信息须准确真实，虚假将取消参赛资格",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R024",
+          "name": "短视频报名例外须说明",
+          "type": "keyword",
+          "field": "正文",
+          "keywords": [
+            "短视频赛项选手除外"
+          ],
+          "severity": "warning",
+          "message": "未说明短视频赛项选手除外于9月14日官网报名截止要求",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R025",
+          "name": "校赛优秀者晋级省赛须明确",
+          "type": "keyword",
+          "field": "正文",
+          "keywords": [
+            "校赛优秀者",
+            "代表我校参加省赛"
+          ],
+          "severity": "warning",
+          "message": "未明确各分赛项校赛优秀者代表我校参加省赛",
+          "scene": [
+            "通知公告"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R001",
+          "name": "参赛学生人数限制1至4人",
+          "type": "range",
+          "field": "学生人数",
+          "min": 1,
+          "max": 4,
+          "severity": "error",
+          "message": "参赛队伍学生人数应在1至4人之间",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R002",
+          "name": "指导教师人数须为1人",
+          "type": "range",
+          "field": "指导教师人数",
+          "min": 1,
+          "max": 1,
+          "severity": "error",
+          "message": "每支参赛队伍须有且仅有1名指导教师",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R003",
+          "name": "参赛队长须为研究生身份",
+          "type": "keyword",
+          "field": "队长身份",
+          "keywords": [
+            "研究生",
+            "硕士",
+            "博士",
+            "本研贯通",
+            "已取得读研资格"
+          ],
+          "severity": "critical",
+          "message": "参赛队伍队长必须为在读研究生（含硕士、博士、本研贯通等）",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R004",
+          "name": "本科生比例不高于50%",
+          "type": "range",
+          "field": "本科生比例",
+          "min": 0,
+          "max": 50,
+          "severity": "error",
+          "message": "参赛队伍中本科生比例不得高于50%",
+          "scene": [
+            "资格审查"
+          ],
+          "condition": "队伍中有本科生参加"
+        },
+        {
+          "id": "学科竞赛管理_R005",
+          "name": "作品文档须为PDF格式",
+          "type": "regex",
+          "field": "文件格式",
+          "pattern": "(?i)\\.pdf$",
+          "severity": "error",
+          "message": "作品文档资料必须为PDF格式",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R006",
+          "name": "作品文档大小不超过10M",
+          "type": "range",
+          "field": "文件大小",
+          "min": 0,
+          "max": 10,
+          "severity": "error",
+          "message": "作品文档资料大小不得超过10M",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R007",
+          "name": "参赛文件命名格式要求",
+          "type": "regex",
+          "field": "文件名",
+          "pattern": "^[^+]+\\+[^+]+\\+[^+]+$",
+          "severity": "error",
+          "message": "文件命名须为“队长姓名+作品名称+资料名称”",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R008",
+          "name": "作品文档须含必要章节",
+          "type": "keyword",
+          "field": "文档内容",
+          "keywords": [
+            "作品简介",
+            "设计方案",
+            "测试报告",
+            "参赛作品声明"
+          ],
+          "severity": "error",
+          "message": "作品文档资料缺少必要章节（如作品简介、设计方案、测试报告、参赛作品声明等）",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R009",
+          "name": "作品不得体现学院导师信息",
+          "type": "regex",
+          "field": "文档内容",
+          "pattern": "^(?!.*(学院|导师)).*$",
+          "severity": "critical",
+          "message": "作品正文、展示材料及说明文档中不得体现学院、导师等可能影响比赛公平的信息",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R010",
+          "name": "作品须提交原创性声明",
+          "type": "required",
+          "field": "参赛作品声明",
+          "severity": "error",
+          "message": "缺少参赛作品声明或原创性声明",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R011",
+          "name": "已获奖作品需提交改进说明",
+          "type": "required",
+          "field": "作品重大改进说明",
+          "severity": "error",
+          "message": "已获中国研究生创新实践系列大赛奖项的作品重复参赛，需提交《作品重大改进说明》",
+          "scene": [
+            "通用"
+          ],
+          "condition": "作品曾获中国研究生创新实践系列大赛奖项"
+        },
+        {
+          "id": "学科竞赛管理_R012",
+          "name": "指导教师须为在职教师",
+          "type": "keyword",
+          "field": "指导教师身份",
+          "keywords": [
+            "在职",
+            "教师"
+          ],
+          "severity": "error",
+          "message": "指导教师须为参赛队伍所在高校在职教师",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "学科竞赛管理_R013",
+          "name": "参赛学生须为在读研究生",
+          "type": "keyword",
+          "field": "学生身份",
+          "keywords": [
+            "在读研究生",
+            "硕士",
+            "博士",
+            "本研贯通",
+            "已取得读研资格"
+          ],
+          "severity": "critical",
+          "message": "参赛学生应为正式注册的在读研究生（含硕士、博士、本研贯通等）",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "keywords": [
+            "中文"
+          ],
+          "id": "学科竞赛管理_R028",
+          "name": "申报材料须为中文",
+          "field": "研究报告、学术论文、社会调查报告及所附材料",
+          "type": "keyword",
+          "severity": "error",
+          "scene": [
+            "申请表"
+          ],
+          "condition": "",
+          "message": "申报材料未使用中文，外文材料须附中文本",
+          "source_excerpt": "研究报告、学术论文、社会调查报告及所附的有关材料必须是中文（若是外文，请附中文本）",
+          "source_page": 1
+        },
+        {
+          "min": 0,
+          "max": 10,
+          "id": "学科竞赛管理_R033",
+          "name": "集体项目作者不超过10人",
+          "field": "其他作者情况",
+          "type": "range",
+          "severity": "error",
+          "scene": [
+            "申请表"
+          ],
+          "condition": "",
+          "message": "集体项目总申报者超过10人",
+          "source_excerpt": "其他作者情况（总申报者不超过10人）",
+          "source_page": 1
+        },
+        {
+          "min": 0,
+          "max": 3,
+          "id": "学科竞赛管理_R034",
+          "name": "指导老师不超过3人",
+          "field": "指导老师情况",
+          "type": "range",
+          "severity": "error",
+          "scene": [
+            "申请表"
+          ],
+          "condition": "",
+          "message": "指导老师人数超过3人",
+          "source_excerpt": "指导老师情况（不超过3人）",
+          "source_page": 1
+        },
+        {
+          "keywords": [
+            "第一作者"
+          ],
+          "id": "学科竞赛管理_R035",
+          "name": "个人项目申报者须为第一作者",
+          "field": "申报者情况",
+          "type": "keyword",
+          "severity": "error",
+          "scene": [
+            "申请表"
+          ],
+          "condition": "",
+          "message": "个人项目申报者未填写为个人作品的第一作者",
+          "source_excerpt": "申报者情况栏内必须填写个人作品的第一作者（承担申报作品60%以上的工作者）",
+          "source_page": 1
+        },
+        {
+          "keywords": [
+            "研究报告"
+          ],
+          "id": "学科竞赛管理_R039",
+          "name": "科技发明制作须附研究报告",
+          "field": "申报材料清单",
+          "type": "keyword",
+          "severity": "error",
+          "scene": [
+            "申请表"
+          ],
+          "condition": "",
+          "message": "科技发明制作类作品未附研究报告",
+          "source_excerpt": "本表必须附有研究报告，并提供图表、曲线、试验数据、原理结构图、外观图（照片），也可附鉴定证书和应用证书",
+          "source_page": 1
+        },
+        {
+          "keywords": [
+            "空白表格"
+          ],
+          "id": "学科竞赛管理_R040",
+          "name": "申报书不得残留空白表格",
+          "field": "申报书",
+          "type": "forbidden_keyword",
+          "severity": "warning",
+          "scene": [
+            "申请表"
+          ],
+          "condition": "",
+          "message": "申报书未删除不需填写的空白表格",
+          "source_excerpt": "并请删除不需填写的空白表格。",
+          "source_page": 1
+        }
+      ],
+      "source_docs": [
+        "关于举办2026“外研社·国才杯”“理解当代中国”全国大学生外语能力大赛广东工业大学校赛的通知.txt",
+        "关于组织参加第五届中国研究生网络安全创新大赛的通知.txt",
+        "2. 附件1：第十二届“挑战杯”广东工业大学学生课外学术科技作品竞赛作品申报书.doc"
+      ]
+    },
+    "校园艺术活动": {
+      "rules": [
+        {
+          "id": "校园艺术活动_R001",
+          "name": "申报人须为在校在读学生",
+          "type": "required",
+          "field": "在读证明",
+          "severity": "critical",
+          "message": "缺少在读证明，无法确认申报人为在校在读学生（含留学生）",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "校园艺术活动_R002",
+          "name": "非专业组须非艺术专业",
+          "type": "required",
+          "field": "非艺术专业证明",
+          "severity": "error",
+          "message": "非专业组（甲组）申报人缺少非艺术专业证明，不符合组别要求",
+          "scene": [
+            "资格审查"
+          ],
+          "condition": "适用于非专业组"
+        },
+        {
+          "id": "校园艺术活动_R003",
+          "name": "专业组须艺术专业",
+          "type": "required",
+          "field": "艺术专业证明",
+          "severity": "error",
+          "message": "专业组（乙组）申报人缺少艺术专业证明（含师范艺术教育专业），不符合组别要求",
+          "scene": [
+            "资格审查"
+          ],
+          "condition": "适用于专业组"
+        },
+        {
+          "id": "校园艺术活动_R004",
+          "name": "作品主题须含大赛主题",
+          "type": "keyword",
+          "field": "作品主题",
+          "keywords": [
+            "多彩大湾区",
+            "艺起向未来"
+          ],
+          "severity": "error",
+          "message": "作品主题未包含‘多彩大湾区，艺起向未来’关键词，不符合内容要求",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "校园艺术活动_R005",
+          "name": "申报材料须含电子版",
+          "type": "keyword",
+          "field": "材料形式",
+          "keywords": [
+            "电子版",
+            "U盘"
+          ],
+          "severity": "error",
+          "message": "申报材料缺少电子版U盘或电子版文件，不符合提交要求",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "校园艺术活动_R006",
+          "name": "材料须按类别分类准备",
+          "type": "keyword",
+          "field": "材料分类",
+          "keywords": [
+            "艺术表演类",
+            "艺术作品类",
+            "数智创新类"
+          ],
+          "severity": "error",
+          "message": "申报材料未按艺术表演类、艺术作品类、数智创新类分类准备",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "校园艺术活动_R007",
+          "name": "须明确申报组别",
+          "type": "required",
+          "field": "组别",
+          "severity": "error",
+          "message": "未明确申报组别（专业组/非专业组）",
+          "scene": [
+            "通用"
+          ]
+        },
+        {
+          "id": "校园艺术活动_R008",
+          "name": "提交日期不得晚于截止日",
+          "type": "range",
+          "field": "提交日期",
+          "max": "2025-11-13",
+          "severity": "error",
+          "message": "提交日期晚于2025年11月13日，逾期不予受理",
+          "scene": [
+            "通用"
+          ]
+        }
+      ],
+      "source_docs": [
+        "关于公开征集第五届粤港澳大湾区大学生艺术节作品的通知.txt"
+      ]
+    },
+    "团员推优": {
+      "rules": [
+        {
+          "id": "团员推优_R001",
+          "name": "入团满一年方可参加推优",
+          "type": "range",
+          "field": "入团年限",
+          "min": 1,
+          "severity": "critical",
+          "message": "入团未满一年，不符合评优/推优资格",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "团员推优_R002",
+          "name": "评优需完成i志愿注册",
+          "type": "required",
+          "field": "i志愿注册状态",
+          "severity": "critical",
+          "message": "缺少i志愿注册记录，不符合评优资格",
+          "scene": [
+            "资格审查"
+          ]
+        },
+        {
+          "id": "团员推优_R003",
+          "name": "无挂科方可获得评优资格",
+          "type": "status",
+          "field": "挂科记录",
+          "pass_values": [
+            "无挂科",
+            "没有挂科",
+            "未挂科"
+          ],
+          "fail_values": [
+            "存在挂科",
+            "有挂科",
+            "挂科课程"
+          ],
+          "severity": "critical",
+          "message": "存在挂科记录（补考或重修通过仍视为挂科，不含选修），不符合评优资格",
+          "scene": [
+            "资格审查"
+          ],
+          "condition": "非大一研一学生；大一研一满足前两个即可"
+        },
+        {
+          "id": "团员推优_R004",
+          "name": "推优需提交申请时年满18岁",
+          "type": "range",
+          "field": "提交入党申请书时年龄",
+          "min": 18,
+          "severity": "critical",
+          "message": "提交入党申请书时未年满18岁，不符合推优资格",
+          "scene": [
+            "资格审查"
+          ],
+          "condition": "参加推优"
+        },
+        {
+          "id": "团员推优_R005",
+          "name": "评优成功人数不超过三成退一",
+          "type": "range",
+          "field": "评优成功人数",
+          "max": "floor(0.3 * 班级团员数a)",
+          "severity": "critical",
+          "message": "评优成功人数超过0.3a（退一法取整）的名额上限",
+          "scene": [
+            "会议记录"
+          ]
+        },
+        {
+          "id": "团员推优_R006",
+          "name": "推优成功人数不超过两成五进一",
+          "type": "range",
+          "field": "推优成功人数",
+          "max": "ceil(0.25 * 班级团员数a)",
+          "severity": "critical",
+          "message": "推优成功人数超过0.25a（进一法取整）的名额上限",
+          "scene": [
+            "会议记录"
+          ]
+        },
+        {
+          "id": "团员推优_R007",
+          "name": "推优赞成票须超过半数",
+          "type": "range",
+          "field": "赞成票数",
+          "min": "0.5 * 班级团员数a + 1",
+          "severity": "critical",
+          "message": "推优成功者获得的赞成票未超过班级团员数的一半，不能推优成功",
+          "scene": [
+            "会议记录"
+          ],
+          "condition": "推优会议"
+        },
+        {
+          "id": "团员推优_R008",
+          "name": "票根日期须两位数字加日",
+          "type": "regex",
+          "field": "日期",
+          "pattern": "^(0[1-9]|[12][0-9]|3[01])日$",
+          "severity": "error",
+          "message": "日期必须为两位数字加“日”，如08日、09日、15日、31日；不应写8日、9日",
+          "scene": [
+            "票根",
+            "会议记录",
+            "通用"
+          ]
+        },
+        {
+          "id": "团员推优_R009",
+          "name": "票根年级专业班级须全称",
+          "type": "keyword",
+          "field": "年级专业班级",
+          "keywords": [
+            "级",
+            "专业",
+            "班"
+          ],
+          "severity": "error",
+          "message": "票根中年级专业班级未写全称或使用了简称，应以教务系统为准",
+          "scene": [
+            "票根"
+          ]
+        },
+        {
+          "id": "团员推优_R010",
+          "name": "票根第二行内容须同一行",
+          "type": "required",
+          "field": "票根第二行",
+          "severity": "error",
+          "message": "票根第二行内容被分成两行，年级专业班级与时间应控制在同一行",
+          "scene": [
+            "票根"
+          ]
+        },
+        {
+          "id": "团员推优_R011",
+          "name": "票根不得残留模版备注",
+          "type": "forbidden_keyword",
+          "field": "票根内容",
+          "keywords": [
+            "备注",
+            "模版",
+            "模板"
+          ],
+          "severity": "error",
+          "message": "票根中残留模版备注文字，应删除后再使用",
+          "scene": [
+            "票根"
+          ]
+        },
+        {
+          "id": "团员推优_R012",
+          "name": "票根候选人姓名须正确",
+          "type": "required",
+          "field": "候选人姓名",
+          "severity": "error",
+          "message": "票根候选人姓名有误或与名单不一致",
+          "scene": [
+            "票根"
+          ]
+        },
+        {
+          "id": "团员推优_R013",
+          "name": "选票打勾不得碰框涂改",
+          "type": "status",
+          "field": "选票勾记",
+          "pass_values": [
+            "无涂改",
+            "未涂改",
+            "无碰框",
+            "未碰框",
+            "规范",
+            "有效"
+          ],
+          "fail_values": [
+            "存在涂改",
+            "有涂改",
+            "已涂改",
+            "碰框涂改",
+            "超出勾选框",
+            "涂划",
+            "无效"
+          ],
+          "severity": "critical",
+          "message": "选票打勾碰框或存在涂改，该张选票无效",
+          "scene": [
+            "选票"
+          ]
+        },
+        {
+          "id": "团员推优_R014",
+          "name": "评议选票勾选数不得超过名额",
+          "type": "range",
+          "field": "勾选数",
+          "max": "评优名额",
+          "severity": "critical",
+          "message": "评议选票勾选数超过评优名额，该张选票无效；可以不打勾",
+          "scene": [
+            "选票"
+          ],
+          "condition": "评议会议"
+        },
+        {
+          "id": "团员推优_R015",
+          "name": "推优选票须三选一且不碰框",
+          "type": "required",
+          "field": "推优选票勾选",
+          "severity": "critical",
+          "message": "推优选票未对每个候选人三选一（赞成/反对/弃权）打勾，或勾碰框，该张选票无效",
+          "scene": [
+            "选票"
+          ],
+          "condition": "推优会议"
+        },
+        {
+          "id": "团员推优_R016",
+          "name": "会议记录须有应到实到人数",
+          "type": "required",
+          "field": "应到团员数/实到团员数",
+          "severity": "error",
+          "message": "会议记录缺少应到团员数或实到团员数",
+          "scene": [
+            "会议记录"
+          ]
+        },
+        {
+          "id": "团员推优_R017",
+          "name": "实到人数须超过班级团员数八成",
+          "type": "range",
+          "field": "实到团员数",
+          "min": "0.8 * 班级团员数a + 1",
+          "severity": "critical",
+          "message": "实到团员数未超过班级团员数的80%，不符合推优会议召开条件（评议需超过2/3）",
+          "scene": [
+            "会议记录"
+          ],
+          "condition": "推优会议；评议会议则需超过2/3"
+        },
+        {
+          "id": "团员推优_R018",
+          "name": "评优成功名单按赞成票降序",
+          "type": "required",
+          "field": "评优成功名单排序",
+          "severity": "error",
+          "message": "评优成功名单未按赞成票从高到低排序",
+          "scene": [
+            "会议记录"
+          ]
+        },
+        {
+          "id": "团员推优_R019",
+          "name": "推优名单按赞成降序反对升序",
+          "type": "required",
+          "field": "推优成功名单排序",
+          "severity": "error",
+          "message": "推优名单未按赞成票从高到低、赞成票相同则反对票少者优先排序",
+          "scene": [
+            "会议记录"
+          ],
+          "condition": "推优会议"
+        },
+        {
+          "id": "团员推优_R020",
+          "name": "会议记录须写评优成功人数",
+          "type": "required",
+          "field": "评优成功人数",
+          "severity": "error",
+          "message": "会议记录/黑板右下角缺少评优成功人数",
+          "scene": [
+            "会议记录"
+          ]
+        },
+        {
+          "id": "团员推优_R021",
+          "name": "会议记录须写推优成功人数",
+          "type": "required",
+          "field": "推优成功人数",
+          "severity": "error",
+          "message": "会议记录/黑板右下角缺少推优成功人数",
+          "scene": [
+            "会议记录"
+          ]
+        },
+        {
+          "id": "团员推优_R022",
+          "name": "推荐表须注明入党积极分子",
+          "type": "keyword",
+          "field": "推优类型",
+          "keywords": [
+            "入党积极分子"
+          ],
+          "severity": "error",
+          "message": "推荐表/申请表中未注明推选为入党积极分子",
+          "scene": [
+            "推荐表",
+            "申请表"
+          ]
+        },
+        {
+          "id": "团员推优_R023",
+          "name": "评议结果须为优秀或合格",
+          "type": "enum",
+          "field": "年度评议结果",
+          "values": [
+            "优秀",
+            "合格"
+          ],
+          "severity": "error",
+          "message": "年度评议结果不是“优秀”或“合格”",
+          "scene": [
+            "会议记录",
+            "资格审查"
+          ]
+        }
+      ],
+      "source_docs": [
+        "团员评议会议和推优会议说明.docx"
+      ]
+    }
+  },
+  "global_rules": []
+}

@@ -1,0 +1,47 @@
+# 数据文件夹（含用户上传的文档，不提交）
+data/
+data_备份/
+rule_drafts.json
+rule_drafts.json.tmp
+auth.db
+auth.db-shm
+auth.db-wal
+user_materials/
+
+# 敏感信息
+.env
+
+# 虚拟环境
+.venv/
+
+# 数据库
+chroma_db/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+.vscode/
+
+# 临时文件
+~$*
+temp_*
+# 本地运行日志与对照测试中间产物
+.run_*.log
+.compare*.log
+__pycache__/
+
+# 测试缓存
+.pytest_cache/
+.coverage
+htmlcov/
+
+# AI 协作工具的项目笔记（仅本地，不提交）
+.workbuddy/
+
+# 说明：archive/ 是**要进 git** 的（存档历史产物，见其中 README.md）
+#这个文件叫做 .gitignore，它是 Git（版本控制工具）的一个“打包黑名单”或“门禁清单”。
+#当你把代码上传到 GitHub、Gitee 或 GitLab 时，Git 默认会把你项目里的所有文件都传上去。
+#但有些文件是绝对不能传、或者没必要传的，gitignore 就是用来告诉 Git：“这几样东西，留在我的电脑上就行，千万别传上去！”

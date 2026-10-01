@@ -1,0 +1,269 @@
+{
+  "manifest": {
+    "module": "review",
+    "case_set_fingerprint": "ce4c94eb355c",
+    "split": "all",
+    "case_count": 4,
+    "base": "http://127.0.0.1:8001",
+    "generated_at": "2026-10-01 01:18:15"
+  },
+  "summary": {
+    "cases_ok": 4,
+    "cases_error": 0,
+    "verdict_accuracy": 1.0,
+    "matched_verdict_accuracy": 1.0,
+    "rule_coverage": 1.0,
+    "verdict_pairs": 11,
+    "gold_rules": 11,
+    "false_positive": {
+      "fp": 0,
+      "total": 7,
+      "rate": 0.0
+    },
+    "errors": []
+  },
+  "results": [
+    {
+      "id": "rv_001",
+      "split": "dev",
+      "domain": "团员推优",
+      "score": 74,
+      "grade": "需修改",
+      "matched": [
+        {
+          "rule": "票根日期须两位数字加日",
+          "gold": "fail",
+          "pred": "fail",
+          "correct": true
+        },
+        {
+          "rule": "票根不得残留模版备注",
+          "gold": "fail",
+          "pred": "fail",
+          "correct": true
+        },
+        {
+          "rule": "票根候选人姓名须正确",
+          "gold": "pass",
+          "pred": "pass",
+          "correct": true
+        }
+      ],
+      "missing": [],
+      "extra": [
+        {
+          "rule": "票根年级专业班级须全称",
+          "pred": "pass"
+        },
+        {
+          "rule": "票根第二行内容须同一行",
+          "pred": "pass"
+        }
+      ],
+      "accuracy": 1.0,
+      "matched_accuracy": 1.0,
+      "coverage": 1.0,
+      "false_positive": {
+        "fp": 0,
+        "total": 1,
+        "rate": 0.0
+      },
+      "n_matched": 3,
+      "n_gold": 3
+    },
+    {
+      "id": "rv_002",
+      "split": "dev",
+      "domain": "团员推优",
+      "score": 92,
+      "grade": "通过",
+      "matched": [
+        {
+          "rule": "票根日期须两位数字加日",
+          "gold": "pass",
+          "pred": "pass",
+          "correct": true
+        },
+        {
+          "rule": "票根不得残留模版备注",
+          "gold": "pass",
+          "pred": "pass",
+          "correct": true
+        },
+        {
+          "rule": "票根候选人姓名须正确",
+          "gold": "pass",
+          "pred": "pass",
+          "correct": true
+        }
+      ],
+      "missing": [],
+      "extra": [
+        {
+          "rule": "票根年级专业班级须全称",
+          "pred": "pass"
+        },
+        {
+          "rule": "票根第二行内容须同一行",
+          "pred": "pass"
+        }
+      ],
+      "accuracy": 1.0,
+      "matched_accuracy": 1.0,
+      "coverage": 1.0,
+      "false_positive": {
+        "fp": 0,
+        "total": 3,
+        "rate": 0.0
+      },
+      "n_matched": 3,
+      "n_gold": 3
+    },
+    {
+      "id": "rv_003",
+      "split": "test",
+      "domain": "奖学金评定",
+      "score": 27,
+      "grade": "未通过",
+      "matched": [
+        {
+          "rule": "体质测试成绩不低于80分",
+          "gold": "fail",
+          "pred": "fail",
+          "correct": true
+        },
+        {
+          "rule": "品德素质测评不低于80分",
+          "gold": "pass",
+          "pred": "pass",
+          "correct": true
+        },
+        {
+          "rule": "无挂科方可参评奖学金",
+          "gold": "fail",
+          "pred": "fail",
+          "correct": true
+        }
+      ],
+      "missing": [],
+      "extra": [
+        {
+          "rule": "第二课堂时长至少60",
+          "pred": "pending"
+        },
+        {
+          "rule": "理想信念时长不低于5",
+          "pred": "pending"
+        },
+        {
+          "rule": "文体艺术时长不低于5",
+          "pred": "pending"
+        },
+        {
+          "rule": "实践志愿时长不低于5",
+          "pred": "pending"
+        },
+        {
+          "rule": "双创实训时长不低于2",
+          "pred": "pending"
+        },
+        {
+          "rule": "校园建设时长不低于2",
+          "pred": "pending"
+        },
+        {
+          "rule": "总积分权重计算正确",
+          "pred": "fail"
+        },
+        {
+          "rule": "品德分计算公式正确",
+          "pred": "na"
+        },
+        {
+          "rule": "免测学生仍可评优",
+          "pred": "fail"
+        }
+      ],
+      "accuracy": 1.0,
+      "matched_accuracy": 1.0,
+      "coverage": 1.0,
+      "false_positive": {
+        "fp": 0,
+        "total": 1,
+        "rate": 0.0
+      },
+      "n_matched": 3,
+      "n_gold": 3
+    },
+    {
+      "id": "rv_004",
+      "split": "test",
+      "domain": "团员推优",
+      "score": 67,
+      "grade": "需修改",
+      "matched": [
+        {
+          "rule": "实到人数须超过班级团员数八成",
+          "gold": "pass",
+          "pred": "pass",
+          "correct": true
+        },
+        {
+          "rule": "评议结果须为优秀或合格",
+          "gold": "pass",
+          "pred": "pass",
+          "correct": true
+        }
+      ],
+      "missing": [],
+      "extra": [
+        {
+          "rule": "评优成功人数不超过三成退一",
+          "pred": "pending"
+        },
+        {
+          "rule": "推优成功人数不超过两成五进一",
+          "pred": "pass"
+        },
+        {
+          "rule": "推优赞成票须超过半数",
+          "pred": "pass"
+        },
+        {
+          "rule": "票根日期须两位数字加日",
+          "pred": "pending"
+        },
+        {
+          "rule": "会议记录须有应到实到人数",
+          "pred": "pass"
+        },
+        {
+          "rule": "评优成功名单按赞成票降序",
+          "pred": "fail"
+        },
+        {
+          "rule": "推优名单按赞成降序反对升序",
+          "pred": "fail"
+        },
+        {
+          "rule": "会议记录须写评优成功人数",
+          "pred": "fail"
+        },
+        {
+          "rule": "会议记录须写推优成功人数",
+          "pred": "pass"
+        }
+      ],
+      "accuracy": 1.0,
+      "matched_accuracy": 1.0,
+      "coverage": 1.0,
+      "false_positive": {
+        "fp": 0,
+        "total": 2,
+        "rate": 0.0
+      },
+      "n_matched": 2,
+      "n_gold": 2
+    }
+  ]
+}

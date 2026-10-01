@@ -1,0 +1,8 @@
+# 测试依赖（与运行依赖分开，避免把 pytest 打进部署环境）
+# 安装： pip install -r requirements-dev.txt
+pytest>=8.0
+
+# 说明：
+#   tests/ 下的纯逻辑用例只额外需要 pyyaml / python-dotenv（运行依赖里已有）。
+#   端到端用例（tests/test_api_integration.py）复用运行依赖，默认跳过，
+#   需要时设 RUN_INTEGRATION=1。

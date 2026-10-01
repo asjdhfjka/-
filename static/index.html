@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#0b4bb3">
+    <title>工大智政 · AI 校务助手</title>
+    <link rel="stylesheet" href="/app.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div id="login-screen" class="login-screen">
+        <div class="login-visual">
+            <div class="login-emblem">工</div>
+            <div>
+                <div class="login-product">工大智政</div>
+                <div class="login-tagline">让校园事务更简单</div>
+            </div>
+            <div class="login-copy">
+                <span class="eyebrow light">GDUT SMART CAMPUS</span>
+                <h1>懂政策，也懂你的<br>AI 校务助手</h1>
+                <p>政策问答、材料预审、人工复核和规则管理，在一个可信工作台中完成。</p>
+            </div>
+        </div>
+        <form class="login-card" onsubmit="login(event)">
+            <div class="mobile-brand"><span class="brand-mark">工</span><b>工大智政</b></div>
+            <span class="eyebrow">欢迎回来</span>
+            <h2>登录校务工作台</h2>
+            <p class="muted">系统会根据账号身份进入对应界面</p>
+            <label class="field-label" for="login-username">用户名</label>
+            <input class="field-input" id="login-username" autocomplete="username" placeholder="请输入用户名" required>
+            <label class="field-label" for="login-password">密码</label>
+            <input class="field-input" id="login-password" type="password" autocomplete="current-password" placeholder="请输入密码" required>
+            <button id="login-submit" class="primary-button full" type="submit">进入系统</button>
+            <div id="login-error" class="form-message error"></div>
+            <div class="demo-box">
+                <span>比赛演示账号 · 密码 Demo@123456</span>
+                <div>
+                    <button type="button" onclick="fillDemoAccount('student')">学生端</button>
+                    <button type="button" onclick="fillDemoAccount('reviewer')">审核端</button>
+                    <button type="button" onclick="fillDemoAccount('admin')">管理端</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="app-shell" class="app-shell hidden">
+        <aside id="sidebar" class="sidebar">
+            <div class="brand">
+                <span class="brand-mark">工</span>
+                <div><b>工大智政 · AI</b><small>让校园事务更简单</small></div>
+            </div>
+            <button id="new-chat-button" class="new-chat" onclick="startNewChat()"><span>＋</span> 新对话</button>
+            <nav id="role-nav" class="role-nav"></nav>
+            <section id="recent-section" class="recent-section">
+                <div class="side-caption">最近对话</div>
+                <div id="recent-chats" class="recent-chats"><div class="side-empty">暂无记录</div></div>
+            </section>
+            <button class="profile-card" onclick="showProfileMenu()">
+                <span id="profile-avatar" class="avatar">同</span>
+                <span class="profile-copy"><b id="profile-name">同学</b><small id="profile-meta">学生</small></span>
+                <span>›</span>
+            </button>
+        </aside>
+
+        <main class="main-stage">
+            <header class="mobile-header">
+                <button class="plain-icon" onclick="toggleSidebar()">☰</button>
+                <div><b>工大智政</b><small id="mobile-role">学生工作台</small></div>
+                <button class="plain-icon" onclick="logout()">↪</button>
+            </header>
+
+            <section id="view-student-home" class="page-view">
+                <div class="hero-banner">
+                    <div class="hero-copy">
+                        <span class="eyebrow light">SMART CAMPUS ASSISTANT</span>
+                        <h1>你好，<span data-user-name>同学</span> 👋<br>今天想了解什么？</h1>
+                        <p>我可以为你解答学校政策、办事流程，或帮你预审各类申请材料。</p>
+                    </div>
+                    <img src="/campus-hero.svg" alt="校园建筑插画">
+                </div>
+                <div class="quick-grid">
+                    <button class="quick-card blue" onclick="showView('chat')"><span class="quick-icon">⌕</span><span><b>查询政策</b><small>学校通知与制度，一问即答</small></span><i>›</i></button>
+                    <button class="quick-card green" onclick="showView('precheck')"><span class="quick-icon">✓</span><span><b>材料预审</b><small>上传材料，检查问题与修改建议</small></span><i>›</i></button>
+                    <button class="quick-card cyan" onclick="showView('records')"><span class="quick-icon">↗</span><span><b>我的进度</b><small>查看预审记录与正式审核状态</small></span><i>›</i></button>
+                </div>
+                <div class="student-workspace">
+                    <div class="home-chat panel">
+                        <div class="panel-head"><div><span class="panel-kicker">智能问答</span><h3>向校务助手提问</h3></div><button class="text-button" onclick="showView('chat')">展开对话 ›</button></div>
+                        <div id="home-chat-preview" class="home-chat-preview">
+                            <div class="robot-bubble"><span class="robot-avatar">AI</span><p>你好！可以问我报名时间、奖学金条件、办事流程，也可以让我帮你找到正式通知。</p></div>
+                        </div>
+                        <form class="mini-composer" onsubmit="sendHomeQuestion(event)">
+                            <input id="home-question" placeholder="输入你的问题，例如：四级什么时候报名？">
+                            <button type="submit">发送</button>
+                        </form>
+                    </div>
+                    <div class="home-review panel">
+                        <div class="panel-head"><div><span class="panel-kicker green-text">材料预审</span><h3>检查申请材料</h3></div><button class="text-button" onclick="showView('precheck')">全部记录 ›</button></div>
+                        <button class="compact-drop" onclick="openReviewPicker()"><span>⇧</span><b>上传材料进行预审</b><small>支持 PDF、Word、图片，最大 20MB</small></button>
+                        <div class="mini-divider"><span>最近预审</span></div>
+                        <div id="home-review-latest" class="latest-review"><div class="empty-state compact">还没有预审记录</div></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-chat" class="page-view hidden">
+                <div class="page-heading"><div><span class="eyebrow">AI KNOWLEDGE ASSISTANT</span><h1>智能问答</h1><p>答案会标注制度来源，重要事项请以学校正式通知为准。</p></div><button class="secondary-button" onclick="startNewChat()">＋ 新对话</button></div>
+                <div class="chat-panel panel">
+                    <div id="messages" class="messages">
+                        <div class="chat-row assistant"><span class="chat-avatar">AI</span><div class="message-bubble"><b>你好，我是工大智政 AI 助手。</b><p>你可以询问学校政策、报名通知和办事流程。</p></div></div>
+                    </div>
+                    <form class="chat-composer" onsubmit="sendMessage(event)">
+                        <button type="button" class="attach-button" onclick="openReviewPicker()" title="上传材料预审">⌕</button>
+                        <input id="user-input" placeholder="输入你的问题……" autocomplete="off">
+                        <button id="send-btn" type="submit">发送</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="view-precheck" class="page-view hidden">
+                <div class="page-heading"><div><span class="eyebrow">MATERIAL PRE-CHECK</span><h1>材料预审</h1><p>AI 会先检查硬性条件，再给出表述与补充建议。</p></div></div>
+                <div class="precheck-layout">
+                    <div class="panel upload-panel">
+                        <button class="large-dropzone" onclick="openReviewPicker()"><span class="upload-cloud">⇧</span><b>点击选择材料</b><small>PDF / Word / TXT / 图片 · 单文件不超过 20MB</small></button>
+                        <div id="review-progress" class="review-progress hidden"></div>
+                    </div>
+                    <div class="panel guide-panel">
+                        <span class="panel-kicker">审查说明</span><h3>提交前建议</h3>
+                        <ol><li>保证姓名、学号和学院信息清晰可见</li><li>证书、票据图片避免模糊和遮挡</li><li>预审通过后再提交负责人正式审核</li></ol>
+                    </div>
+                </div>
+                <div class="panel section-panel">
+                    <div class="panel-head"><div><span class="panel-kicker">RECENT</span><h3>最近预审</h3></div><button class="text-button" onclick="loadReviewHistory()">刷新</button></div>
+                    <div id="precheck-history" class="record-grid"><div class="empty-state">正在读取记录…</div></div>
+                </div>
+            </section>
+
+            <section id="view-records" class="page-view hidden">
+                <div class="page-heading"><div><span class="eyebrow">MY RECORDS</span><h1>我的记录</h1><p>查看问答历史、预审结论和正式审核进度。</p></div></div>
+                <div class="record-tabs"><button class="active" onclick="switchRecordTab('reviews',this)">材料记录</button><button onclick="switchRecordTab('chats',this)">问答记录</button></div>
+                <div id="record-content" class="panel records-panel"><div class="empty-state">正在读取记录…</div></div>
+            </section>
+
+            <section id="view-reviewer-home" class="page-view hidden">
+                <div class="page-heading"><div><span class="eyebrow">REVIEW WORKBENCH</span><h1>审核工作台</h1><p><span data-user-name>负责人</span>，这里汇总待处理材料和规则草稿。</p></div><button class="primary-button" onclick="showView('submissions')">进入审核队列</button></div>
+                <div id="reviewer-kpis" class="kpi-grid"></div>
+                <div class="dashboard-grid">
+                    <div class="panel section-panel span-2"><div class="panel-head"><div><span class="panel-kicker">QUEUE</span><h3>最新待审核材料</h3></div><button class="text-button" onclick="showView('submissions')">查看全部 ›</button></div><div id="reviewer-latest" class="submission-list"></div></div>
+                    <div class="panel action-panel"><span class="action-icon purple">规</span><h3>规则草稿审核</h3><p>逐条确认模型抽取的规则，再发布到正式规则库。</p><button class="secondary-button" onclick="openRuleDrafts()">打开规则中心</button></div>
+                </div>
+            </section>
+
+            <section id="view-submissions" class="page-view hidden">
+                <div class="page-heading"><div><span class="eyebrow">MATERIAL QUEUE</span><h1>材料审核</h1><p id="submission-subtitle">查看学生正式提交的材料并给出人工结论。</p></div><button class="secondary-button" onclick="loadSubmissions()">刷新队列</button></div>
+                <div class="filter-bar" id="submission-filters"><button class="active" data-status="all">全部</button><button data-status="submitted">待处理</button><button data-status="reviewing">审核中</button><button data-status="changes_requested">需修改</button><button data-status="approved">已通过</button></div>
+                <div id="submission-list" class="panel table-panel"><div class="empty-state">正在读取提交记录…</div></div>
+            </section>
+
+            <section id="view-rules" class="page-view hidden">
+                <div class="page-heading"><div><span class="eyebrow">RULE GOVERNANCE</span><h1>规则中心</h1><p>候选规则经负责人逐条确认后，才会进入正式审查库。</p></div><button class="primary-button" onclick="openRuleDrafts()">审核规则草稿</button></div>
+                <div class="info-grid"><div class="panel info-card"><span>①</span><h3>抽取草稿</h3><p>上传制度文件后，模型只生成候选规则。</p></div><div class="panel info-card"><span>②</span><h3>人工确认</h3><p>负责人核对字段、条件和制度原文。</p></div><div class="panel info-card"><span>③</span><h3>统一发布</h3><p>全部处理完成后写入正式规则库。</p></div></div>
+                <div id="rule-summary" class="panel section-panel"><div class="empty-state">点击“审核规则草稿”查看详情</div></div>
+            </section>
+
+            <section id="view-knowledge" class="page-view hidden">
+                <div class="page-heading"><div><span class="eyebrow">KNOWLEDGE BASE</span><h1>知识库维护</h1><p>批量上传学校通知、制度文件和办事指南。</p></div></div>
+                <div class="panel upload-panel wide-panel">
+                    <button class="large-dropzone" onclick="document.getElementById('file-upload').click()"><span class="upload-cloud blue-cloud">＋</span><b>批量选择知识文件</b><small>支持 PDF、Word、TXT、图片；系统会自动去重并更新索引</small></button>
+                    <div id="upload-progress" class="upload-progress"></div>
+                </div>
+            </section>
+
+            <section id="view-admin-home" class="page-view hidden">
+                <div class="page-heading"><div><span class="eyebrow">SYSTEM OVERVIEW</span><h1>管理控制台</h1><p>查看用户、材料流转和系统运行情况。</p></div><button class="secondary-button" onclick="loadAdminDashboard()">刷新数据</button></div>
+                <div id="admin-kpis" class="kpi-grid"></div>
+                <div class="dashboard-grid"><div class="panel section-panel span-2"><div class="panel-head"><div><span class="panel-kicker">USERS</span><h3>账号概览</h3></div><button class="text-button" onclick="showView('users')">管理用户 ›</button></div><div id="admin-user-preview"></div></div><div class="panel action-panel"><span class="action-icon blue-icon">审</span><h3>材料流转</h3><p>进入审核队列查看全校材料处理状态。</p><button class="secondary-button" onclick="showView('submissions')">查看材料</button></div></div>
+            </section>
+
+            <section id="view-users" class="page-view hidden">
+                <div class="page-heading"><div><span class="eyebrow">USER MANAGEMENT</span><h1>用户管理</h1><p>创建账号并控制学生、审核员和管理员权限。</p></div></div>
+                <div class="users-layout"><form class="panel user-form" onsubmit="createUser(event)"><span class="panel-kicker">NEW ACCOUNT</span><h3>创建账号</h3><label>用户名<input id="new-username" required maxlength="50"></label><label>姓名<input id="new-display-name" required maxlength="50"></label><label>初始密码<input id="new-password" type="password" minlength="8" required></label><label>角色<select id="new-role"><option value="student">学生</option><option value="reviewer">审核员</option><option value="admin">管理员</option></select></label><label>学院或部门<input id="new-college" maxlength="100"></label><button id="create-user-btn" class="primary-button full" type="submit">创建账号</button><div id="user-admin-message" class="form-message"></div></form><div class="panel user-table-wrap"><div class="panel-head"><div><span class="panel-kicker">ACCOUNTS</span><h3>账号列表</h3></div><button class="text-button" onclick="loadUsers()">刷新</button></div><div id="user-list"><div class="empty-state">正在读取用户…</div></div></div></div>
+            </section>
+        </main>
+    </div>
+
+    <input id="review-upload" type="file" hidden accept=".pdf,.txt,.docx,.doc,.png,.jpg,.jpeg" onchange="reviewFile()">
+    <input id="file-upload" type="file" hidden multiple accept=".pdf,.txt,.docx,.doc,.png,.jpg,.jpeg" onchange="uploadFiles()">
+
+    <div id="review-modal" class="modal" onclick="if(event.target===this) closeModal('review-modal')"><div class="modal-card review-modal-card"><div class="modal-head"><div><span class="panel-kicker">AI REVIEW REPORT</span><h2 id="review-modal-title">材料审查报告</h2></div><button class="modal-close" onclick="closeModal('review-modal')">×</button></div><div id="review-modal-body" class="modal-body"></div></div></div>
+    <div id="submission-modal" class="modal" onclick="if(event.target===this) closeModal('submission-modal')"><div class="modal-card"><div class="modal-head"><div><span class="panel-kicker">MANUAL REVIEW</span><h2>人工审核处理</h2></div><button class="modal-close" onclick="closeModal('submission-modal')">×</button></div><div id="submission-modal-body" class="modal-body"></div></div></div>
+    <div id="rule-modal" class="modal" onclick="if(event.target===this) closeRuleDrafts()"><div class="modal-card rule-modal-card"><div class="modal-head"><div><span class="panel-kicker">RULE DRAFTS</span><h2>规则草稿审核</h2></div><div class="modal-head-actions"><input id="rule-reviewer" value="负责人" disabled><button class="modal-close" onclick="closeRuleDrafts()">×</button></div></div><div id="rule-draft-list" class="modal-body"><div class="empty-state">正在读取规则草稿…</div></div></div></div>
+    <div id="toast" class="toast"></div>
+
+    <script src="/app.js"></script>
+</body>
+</html>

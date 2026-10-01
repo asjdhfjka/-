@@ -1,0 +1,84 @@
+{
+  "version": "eval-1.0 2026-09-30",
+  "note": "审查题集（种子集）。gold_verdicts 按「规则的本意」标注，而非按当前实现的输出 —— 这样测试才能暴露实现与语义的偏差。三分类口径与 review_engine 对齐：pass=通过 / fail=真正失败（要扣分）/ na=不适用（材料里没有这一项，不扣分）。",
+  "known_issues": [
+    {
+      "id": "BUG-1",
+      "severity": "critical",
+      "desc": "range 规则的 min/max 若为公式字符串（如 \"0.5 * 班级团员数a + 1\"），execute_hard_rules 会拿数字与字符串比较，抛 TypeError，导致整个 /review 请求失败。",
+      "affected_rules": ["团员推优_R007", "团员推优_R017"],
+      "repro": "rv_004"
+    },
+    {
+      "id": "BUG-2",
+      "severity": "critical",
+      "desc": "否定型 keyword 规则（如「票根不得残留模版备注」）被实现成「包含关键词即通过」，语义完全反转：干净票根判失败、脏票根判通过。",
+      "affected_rules": ["团员推优_R011"],
+      "repro": "rv_001 / rv_002"
+    }
+  ],
+  "cases": [
+    {
+      "id": "rv_001", "split": "dev",
+      "gold_domain": "团员推优", "gold_scene": "票根",
+      "notes": "有问题的票根：日期写「5日」（应两位数字）、残留模版备注文字",
+      "material": "团员推优投票票根\n年级专业班级：计算机科学与技术2025级9班\n日期：5日\n候选人：何华儒\n赞成票数：35  反对票数：2  弃权票数：1\n备注：此处为模版提示文字，请删除后再使用",
+      "gold_rules": [
+        {"id": "团员推优_R008", "name": "票根日期须两位数字加日", "type": "regex", "severity": "error"},
+        {"id": "团员推优_R011", "name": "票根不得残留模版备注", "type": "keyword", "severity": "error"},
+        {"id": "团员推优_R012", "name": "票根候选人姓名须正确", "type": "required", "severity": "error"}
+      ],
+      "gold_verdicts": [
+        {"rule_id": "团员推优_R008", "rule": "票根日期须两位数字加日", "verdict": "fail"},
+        {"rule_id": "团员推优_R011", "rule": "票根不得残留模版备注", "verdict": "fail"},
+        {"rule_id": "团员推优_R012", "rule": "票根候选人姓名须正确", "verdict": "pass"}
+      ]
+    },
+    {
+      "id": "rv_002", "split": "dev",
+      "gold_domain": "团员推优", "gold_scene": "票根",
+      "notes": "干净票根，三条规则都应通过",
+      "material": "团员推优投票票根\n年级专业班级：计算机科学与技术2025级9班\n日期：09日\n候选人：何华儒\n赞成票数：35  反对票数：2  弃权票数：1",
+      "gold_rules": [
+        {"id": "团员推优_R008", "name": "票根日期须两位数字加日", "type": "regex", "severity": "error"},
+        {"id": "团员推优_R011", "name": "票根不得残留模版备注", "type": "keyword", "severity": "error"},
+        {"id": "团员推优_R012", "name": "票根候选人姓名须正确", "type": "required", "severity": "error"}
+      ],
+      "gold_verdicts": [
+        {"rule_id": "团员推优_R008", "rule": "票根日期须两位数字加日", "verdict": "pass"},
+        {"rule_id": "团员推优_R011", "rule": "票根不得残留模版备注", "verdict": "pass"},
+        {"rule_id": "团员推优_R012", "rule": "票根候选人姓名须正确", "verdict": "pass"}
+      ]
+    },
+    {
+      "id": "rv_003", "split": "test",
+      "gold_domain": "综合素质测评", "gold_scene": "资格审查",
+      "notes": "体测72未达80、有挂科 → 两条 critical 失败；品德85 通过",
+      "material": "广东工业大学学生奖学金申请资格审查表\n姓名：何华儒\n学号：3125001234\n班级：计算机9班\n体质测试成绩：72\n品德素质测评得分：85\n挂科记录：高等数学（有挂科）",
+      "gold_rules": [
+        {"id": "综合素质测评_R001", "name": "体质测试成绩不低于80分", "type": "range", "severity": "critical"},
+        {"id": "综合素质测评_R002", "name": "品德素质测评不低于80分", "type": "range", "severity": "critical"},
+        {"id": "综合素质测评_R003", "name": "无挂科方可参评奖学金", "type": "keyword", "severity": "critical"}
+      ],
+      "gold_verdicts": [
+        {"rule_id": "综合素质测评_R001", "rule": "体质测试成绩不低于80分", "verdict": "fail"},
+        {"rule_id": "综合素质测评_R002", "rule": "品德素质测评不低于80分", "verdict": "pass"},
+        {"rule_id": "综合素质测评_R003", "rule": "无挂科方可参评奖学金", "verdict": "fail"}
+      ]
+    },
+    {
+      "id": "rv_004", "split": "test",
+      "gold_domain": "团员推优", "gold_scene": "会议记录",
+      "notes": "边界材料：人数与票数均合规。含公式型 min 规则（BUG-1 复现）",
+      "material": "团员推优会议记录\n应到团员数：50\n实到团员数：46\n赞成票数：30\n年度评议结果：优秀\n推优成功人数：2",
+      "gold_rules": [
+        {"id": "团员推优_R017", "name": "实到人数须超过班级团员数八成", "type": "range", "severity": "critical"},
+        {"id": "团员推优_R023", "name": "评议结果须为优秀或合格", "type": "enum", "severity": "error"}
+      ],
+      "gold_verdicts": [
+        {"rule_id": "团员推优_R017", "rule": "实到人数须超过班级团员数八成", "verdict": "pass"},
+        {"rule_id": "团员推优_R023", "rule": "评议结果须为优秀或合格", "verdict": "pass"}
+      ]
+    }
+  ]
+}

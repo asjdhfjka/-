@@ -1,0 +1,258 @@
+{
+  "version": "eval-1.0 2026-09-30",
+  "note": "问答题集（升级版）。相对 eval_cases.py 的变化：新增 gold_answer / gold_sources / expect_refusal / split；key_facts 沿用原关键词。gold_answer 为人工参考答案，留空的条目待人工补全（标注状态见 annotation 字段）。",
+  "refusal_phrases": ["无法回答", "无法准确回答", "未找到", "资料中没有", "未提及", "未明确", "未说明", "没有相关"],
+  "cases": [
+    {
+      "id": "qa_001", "type": "时间提取", "split": "dev",
+      "question": "2026年上半年全国计算机等级考试什么时候报名？",
+      "key_facts": ["报名时间", "3月", "上半年"],
+      "gold_sources": ["广东工业大学2026年上半年全国计算机等级考试报考指南.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_002", "type": "条件提取", "split": "dev",
+      "question": "2026年下半年计算机等级考试报名条件是什么？",
+      "key_facts": ["报名", "上传照片", "信息"],
+      "gold_sources": ["广东工业大学2026年下半年全国计算机等级考试报考指南.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_003", "type": "数字提取", "split": "dev",
+      "question": "计算机等级考试报名费是多少？",
+      "key_facts": ["费用", "元", "报名费"],
+      "gold_sources": ["广东工业大学2026年下半年全国计算机等级考试报考指南.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_004", "type": "列表提取", "split": "dev",
+      "question": "计算机二级考试有哪些科目可以报？",
+      "key_facts": ["科目", "二级"],
+      "gold_sources": ["广东工业大学2026年下半年全国计算机等级考试报考指南.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_005", "type": "多文件对比", "split": "test",
+      "question": "上半年和下半年计算机等级考试的报名时间分别是什么？",
+      "key_facts": ["上半年", "下半年"],
+      "gold_sources": ["广东工业大学2026年上半年全国计算机等级考试报考指南.txt", "广东工业大学2026年下半年全国计算机等级考试报考指南.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_006", "type": "流程型", "split": "dev",
+      "question": "计算机等级考试准考证怎么打印？",
+      "key_facts": ["打印", "准考证"],
+      "gold_sources": ["广东工业大学2026年下半年全国计算机等级考试报考指南.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_007", "type": "时间提取", "split": "dev",
+      "question": "计算机等级考试成绩多久可以查？",
+      "key_facts": ["成绩", "查询", "发布"],
+      "gold_sources": ["广东工业大学2026年下半年全国计算机等级考试报考指南.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_008", "type": "细节提取", "split": "dev",
+      "question": "我们学校计算机等级考试在哪里报名？",
+      "key_facts": ["报名", "网址", "入口"],
+      "gold_sources": ["广东工业大学2026年下半年全国计算机等级考试报考指南.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_009", "type": "流程型", "split": "dev",
+      "question": "团员推优会议的流程是什么？",
+      "key_facts": ["发言", "投票", "唱票"],
+      "gold_sources": ["团员评议会议和推优会议说明.docx"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_010", "type": "数字提取", "split": "test",
+      "question": "推优需要多少票才能通过？",
+      "key_facts": ["赞成", "半数", "票"],
+      "gold_sources": ["团员评议会议和推优会议说明.docx"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_011", "type": "条件提取", "split": "dev",
+      "question": "入团满多久可以参加推优？",
+      "key_facts": ["入团", "满一年", "一年"],
+      "gold_sources": ["团员评议会议和推优会议说明.docx"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_012", "type": "细节提取", "split": "dev",
+      "question": "团员评议会议记录要写哪些内容？",
+      "key_facts": ["评议", "会议", "记录"],
+      "gold_sources": ["团员评议会议和推优会议说明.docx"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_013", "type": "细节提取", "split": "dev",
+      "question": "推优会议上监票人是怎么产生的？",
+      "key_facts": ["监票", "唱票"],
+      "gold_sources": ["团员评议会议和推优会议说明.docx"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_014", "type": "人名检索", "split": "test",
+      "question": "何华儒是哪个班的？担任什么职位？",
+      "key_facts": ["计算机", "9班", "学习委员"],
+      "gold_sources": ["计算机学院25级计算机专业9班+何华儒+附件2.pdf"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_015", "type": "列表提取", "split": "dev",
+      "question": "优秀学生奖学金申请表需要哪些材料？",
+      "key_facts": ["申请表", "材料"],
+      "gold_sources": ["优秀学生X等奖学金申请表.docx"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_016", "type": "条件提取", "split": "dev",
+      "question": "申请优秀学生奖学金需要满足什么条件？",
+      "key_facts": ["条件", "绩点"],
+      "gold_sources": ["优秀学生X等奖学金申请表.docx", "【学院综测细则】广东工业大学计算机学院2025-2026年度本科学生综合素质测评实施细则(1)(1).pdf"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_017", "type": "表格理解", "split": "test",
+      "question": "奖学金申请表里'绩点'一栏怎么填？",
+      "key_facts": ["绩点", "填写"],
+      "gold_sources": ["优秀学生X等奖学金申请表.docx"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_018", "type": "流程型", "split": "dev",
+      "question": "奖学金评选的流程是什么？",
+      "key_facts": ["流程", "评审", "公示"],
+      "gold_sources": ["【学院综测细则】广东工业大学计算机学院2025-2026年度本科学生综合素质测评实施细则(1)(1).pdf"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_019", "type": "边界条件", "split": "test",
+      "question": "有挂科还能申请奖学金吗？",
+      "key_facts": ["挂科", "不能", "不符合"],
+      "gold_sources": ["【学院综测细则】广东工业大学计算机学院2025-2026年度本科学生综合素质测评实施细则(1)(1).pdf"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_020", "type": "流程型", "split": "dev",
+      "question": "'十五五'规划建言献策活动怎么参加？",
+      "key_facts": ["建言", "献策", "提交"],
+      "gold_sources": ["我为广东工业大学“十五五”规划建言献策.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_021", "type": "时间提取", "split": "dev",
+      "question": "建言献策的截止时间是什么时候？",
+      "key_facts": ["截止", "时间"],
+      "gold_sources": ["我为广东工业大学“十五五”规划建言献策.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_022", "type": "时间提取", "split": "dev",
+      "question": "学校巡视组的巡视时间是多久？",
+      "key_facts": ["巡视", "时间"],
+      "gold_sources": ["巡视公告.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_023", "type": "细节提取", "split": "test",
+      "question": "巡视期间怎么联系巡视组？",
+      "key_facts": ["联系", "电话", "邮箱"],
+      "gold_sources": ["巡视公告.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_024", "type": "内容提取", "split": "dev",
+      "question": "巡视公告主要巡视哪些内容？",
+      "key_facts": ["巡视", "内容"],
+      "gold_sources": ["巡视公告.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_025", "type": "事实型", "split": "test",
+      "question": "2026届那个学生邀请函是什么活动？",
+      "key_facts": ["邀请函", "招聘", "活动"],
+      "gold_sources": ["学生邀请函_关于组织参加广东工业大学2026届毕业生春季（综合类）校园招聘会的通知.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_026", "type": "条件提取", "split": "dev",
+      "question": "参加那个学生活动需要什么条件？",
+      "key_facts": ["条件", "要求"],
+      "gold_sources": ["关于组织参加第五届中国研究生网络安全创新大赛的通知.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_027", "type": "流程型", "split": "dev",
+      "question": "那个活动怎么报名参加？",
+      "key_facts": ["报名", "参加"],
+      "gold_sources": [],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_028", "type": "数字提取", "split": "test",
+      "question": "四级考试报名费怎么交？",
+      "key_facts": ["报名费", "元"],
+      "gold_sources": ["关于2026年上半年全国大学英语四、六级笔试及口试报名的通知.txt", "关于2026年下半年全国大学英语四、六级笔试及口试报名的通知.txt"],
+      "expect_refusal": false,
+      "gold_answer": "通过全国大学英语四、六级考试网（cet-bm.neea.edu.cn）网上缴费；CET4/CET6笔试36元/人次，口语50元/人次。",
+      "annotation": "done",
+      "notes": "原题集把这条标成「应拒答」的陷阱题（关键词写 未提及/未找到/无法回答），但四六级报名通知里其实写明了报名费 —— 原期望是错的。实测系统正确回答了 36元/人次。这正是评测要抓的第一类问题：题集本身的标注错误。"
+    },
+    {
+      "id": "qa_029", "type": "代词消解", "split": "test",
+      "question": "啥时候报名啊",
+      "key_facts": ["计算机", "报名"],
+      "gold_sources": ["广东工业大学2026年下半年全国计算机等级考试报考指南.txt"],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_030", "type": "跨文件理解", "split": "test",
+      "question": "奖学金和推优有什么关系？",
+      "key_facts": ["奖学金", "推优"],
+      "gold_sources": [],
+      "expect_refusal": false,
+      "gold_answer": "", "annotation": "pending"
+    },
+    {
+      "id": "qa_031", "type": "拒答能力", "split": "test",
+      "question": "图书馆怎么预约座位？",
+      "key_facts": [],
+      "gold_sources": [],
+      "expect_refusal": true,
+      "gold_answer": "知识库未收录图书馆座位预约信息，应如实说明未找到，而不是拿「科技创新展厅预约」来凑数。",
+      "annotation": "done"
+    }
+  ]
+}
