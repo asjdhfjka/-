@@ -5,6 +5,7 @@ let chatHistory = [];
 let submissions = [];
 let submissionFilter = 'all';
 let ruleDraftBatches = [];
+let activeChatController = null;
 
 const roleNames = {student:'学生', reviewer:'审核员', admin:'管理员'};
 const statusNames = {submitted:'待处理', reviewing:'审核中', changes_requested:'需修改', approved:'已通过'};
@@ -168,6 +169,7 @@ function bindStaticEvents() {
 /* 问答 */
 function startNewChat() {
     if (!currentUser || currentUser.role === 'admin') return;
+    if (activeChatController) activeChatController.abort();
     document.getElementById('messages').innerHTML = `<div class="chat-row assistant"><span class="chat-avatar">AI</span><div class="message-bubble"><b>你好，我是工大智政 AI 助手。</b><p>你可以询问学校政策、报名通知和办事流程。</p></div></div>`;
     showView('chat');
     document.getElementById('user-input').focus();
@@ -212,20 +214,59 @@ function sendHomeQuestion(event) {
     sendMessage();
 }
 
+function createTypewriter(bubble, getSources) {
+    let target = '', shown = 0, running = true, finishResolve = null;
+    const row = bubble.closest('.chat-row');
+    const tick = () => {
+        if (!running) return;
+        if (shown < target.length) {
+            const left = target.length - shown;
+            shown += Math.max(1, Math.min(7, Math.ceil(left / 14)));
+            bubble.innerHTML = `${safeMarkdown(target.slice(0, shown), getSources())}<span class="typing-caret" aria-hidden="true"></span>`;
+            document.getElementById('messages').scrollTop = 999999;
+        } else if (finishResolve) {
+            const resolve = finishResolve; finishResolve = null; running = false;
+            bubble.innerHTML = safeMarkdown(target, getSources());
+            row?.classList.remove('generating'); resolve(); return;
+        }
+        requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    return {
+        append(text) { target += text; },
+        text() { return target; },
+        finish() {
+            if (!running) return Promise.resolve();
+            return new Promise(resolve => { finishResolve = resolve; });
+        },
+        stop() {
+            running = false; shown = target.length;
+            bubble.innerHTML = safeMarkdown(target, getSources());
+            row?.classList.remove('generating');
+            if (finishResolve) { finishResolve(); finishResolve = null; }
+        }
+    };
+}
+
 async function sendMessage(event) {
     if (event) event.preventDefault();
     const input = document.getElementById('user-input');
     const button = document.getElementById('send-btn');
+    if (activeChatController) { activeChatController.abort(); return; }
     const question = input.value.trim(); if (!question) return;
-    appendChat('user', question); input.value=''; input.disabled=true; button.disabled=true; button.textContent='思考中';
-    const bubble = appendChat('assistant','<span class="loading-dots">正在检索知识库 </span>',true);
+    appendChat('user', question); input.value=''; input.disabled=true;
+    button.textContent='停止'; button.classList.add('stop-mode');
+    const controller = new AbortController(); activeChatController = controller;
+    const bubble = appendChat('assistant','<span class="answer-status"><i></i>正在检索学校知识库</span>',true);
+    const row = bubble.closest('.chat-row'); row?.classList.add('generating');
     let buffer='', answer='', sources=[], parsedSources=false;
+    let writer = null;
     try {
         const recent = Array.from(document.querySelectorAll('#messages .message-bubble')).slice(-6,-1).map(el => el.innerText.slice(0,260)).join('\n---\n');
-        const response = await fetch(`/chat/stream?user_input=${encodeURIComponent(question)}&history=${encodeURIComponent(recent)}`, {method:'POST'});
+        const response = await fetch(`/chat/stream?user_input=${encodeURIComponent(question)}&history=${encodeURIComponent(recent)}`, {method:'POST',signal:controller.signal});
         if (response.status === 401) { showLogin('登录状态已失效，请重新登录'); throw new Error('请先登录'); }
         if (!response.ok || !response.body) throw new Error(`服务响应异常（${response.status}）`);
-        const reader=response.body.getReader(), decoder=new TextDecoder('utf-8'); bubble.innerHTML='';
+        const reader=response.body.getReader(), decoder=new TextDecoder('utf-8');
         while (true) {
             const {done,value}=await reader.read(); if (done) break;
             buffer += decoder.decode(value,{stream:true});
@@ -234,12 +275,16 @@ async function sendMessage(event) {
                 if (start >= 0 && end >= 0) {
                     try { sources=JSON.parse(buffer.slice(start+11,end)); } catch (_) { sources=[]; }
                     buffer=buffer.slice(end+7); parsedSources=true;
-                } else if (start >= 0) continue; else parsedSources=true;
+                } else if (start >= 0 || '__SOURCES__'.startsWith(buffer)) continue; else parsedSources=true;
             }
-            if (buffer) { answer+=buffer; buffer=''; bubble.innerHTML=safeMarkdown(answer,sources); document.getElementById('messages').scrollTop=999999; }
+            if (buffer) {
+                if (!writer) { bubble.innerHTML=''; writer=createTypewriter(bubble,()=>sources); }
+                answer+=buffer; writer.append(buffer); buffer='';
+            }
         }
-        if (buffer) answer+=buffer;
-        bubble.innerHTML=safeMarkdown(answer || '暂时没有生成答案，请稍后重试。',sources);
+        if (buffer) { answer+=buffer; if(!writer){bubble.innerHTML='';writer=createTypewriter(bubble,()=>sources);} writer.append(buffer); }
+        if (!answer) { answer='暂时没有生成答案，请稍后重试。'; if(!writer){bubble.innerHTML='';writer=createTypewriter(bubble,()=>sources);} writer.append(answer); }
+        await writer.finish();
         if (sources.length) {
             const used=new Set(Array.from(answer.matchAll(/\[来源(\d+)\]/g)).map(item=>Number(item[1])));
             const final=(used.size?sources.filter(item=>used.has(Number(item.index))):sources.slice(0,3));
@@ -251,9 +296,15 @@ async function sendMessage(event) {
         }
         loadRecentChats();
     } catch (err) {
-        bubble.textContent=err.message || '网络错误，请稍后重试。';
+        if (writer) writer.stop();
+        if (err.name === 'AbortError') {
+            if (!answer) bubble.innerHTML='<span class="answer-stopped">已停止生成</span>';
+            else bubble.insertAdjacentHTML('beforeend','<div class="answer-stopped">已停止生成</div>');
+        } else bubble.textContent=err.message || '网络错误，请稍后重试。';
     } finally {
-        input.disabled=false; button.disabled=false; button.textContent='发送'; input.focus();
+        row?.classList.remove('generating');
+        if (activeChatController === controller) activeChatController = null;
+        input.disabled=false; button.textContent='发送'; button.classList.remove('stop-mode'); input.focus();
     }
 }
 
@@ -272,20 +323,96 @@ function openPastChat(index) {
 }
 
 /* 材料预审与个人记录 */
+const reviewStageMeta = [
+    ['parse','读取并解析材料'], ['identify','识别材料类型'], ['rules','匹配审查规则'],
+    ['facts','提取关键事实'], ['soft','分析材料质量'], ['hard_rules','执行硬规则'],
+    ['report','生成审查报告']
+];
+
+function renderReviewLive(progress, state) {
+    const elapsed=Math.max(0,Math.floor((Date.now()-state.startedAt)/1000));
+    const rows=reviewStageMeta.map(([key,label])=>{
+        const item=state.steps[key]||{status:'pending'};
+        const icon=item.status==='done'?'✓':item.status==='warning'?'!':'';
+        return `<div class="review-stage ${item.status}"><span class="review-stage-dot">${icon}</span><div><b>${esc(label)}</b>${item.message?`<small>${esc(item.message)}</small>`:''}</div></div>`;
+    }).join('');
+    progress.innerHTML=`<div class="review-live">
+        <div class="review-live-head"><div><span class="review-live-kicker">AI MATERIAL REVIEW</span><h4>${esc(state.filename)}</h4></div><strong>${state.progress}%</strong></div>
+        <div class="review-progress-track"><i style="width:${state.progress}%"></i></div>
+        <div class="review-live-status"><span class="live-pulse"></span>${esc(state.message||'正在准备审查')}<em>${elapsed} 秒</em></div>
+        ${state.detail?`<div class="review-live-detail">${esc(state.detail)}</div>`:''}
+        <div class="review-timeline">${rows}</div>
+    </div>`;
+}
+
+function applyReviewEvent(progress, state, event) {
+    state.progress=Math.max(state.progress,Number(event.progress)||0);
+    state.message=event.message||state.message;
+    state.detail=event.detail||'';
+    const finish=(key,status='done')=>state.steps[key]={status,message:event.detail||event.message};
+    if(event.stage==='parse') state.steps.parse={status:state.progress>=18?'done':'active',message:event.detail||event.message};
+    if(event.stage==='identify') state.steps.identify={status:state.progress>=35?(event.status||'done'):'active',message:event.detail||event.message};
+    if(event.stage==='rules') finish('rules');
+    if(event.stage==='analysis') {
+        state.steps.facts={status:'active',message:'正在抽取结构化字段'};
+        state.steps.soft={status:'active',message:'正在检查完整性与规范性'};
+    }
+    if(event.stage==='facts') finish('facts',event.status||'done');
+    if(event.stage==='soft') finish('soft',event.status||'done');
+    if(event.stage==='hard_rules') state.steps.hard_rules={status:state.progress>=87?'done':'active',message:event.detail||event.message};
+    if(event.stage==='report') state.steps.report={status:state.progress>=97?'done':'active',message:event.detail||event.message};
+    if(event.stage==='complete') reviewStageMeta.forEach(([key])=>{if(state.steps[key]?.status!=='warning')state.steps[key]={...state.steps[key],status:'done'};});
+    if(event.stage==='error') state.error=true;
+    renderReviewLive(progress,state);
+}
+
+async function readReviewStream(response, onEvent) {
+    if(response.status===401){showLogin('登录状态已失效，请重新登录');throw new Error('请先登录');}
+    if(!response.ok||!response.body){
+        let data={};try{data=await response.json();}catch(_){}
+        throw new Error(data.detail||data.error||`审查服务响应异常（${response.status}）`);
+    }
+    const reader=response.body.getReader(),decoder=new TextDecoder('utf-8');let buffer='';
+    const consume=block=>{
+        const raw=block.split(/\r?\n/).filter(line=>line.startsWith('data:')).map(line=>line.slice(5).trimStart()).join('\n');
+        if(!raw)return; onEvent(JSON.parse(raw));
+    };
+    while(true){
+        const {done,value}=await reader.read();
+        buffer+=decoder.decode(value||new Uint8Array(),{stream:!done});
+        const blocks=buffer.split(/\r?\n\r?\n/);buffer=blocks.pop()||'';
+        blocks.forEach(consume);if(done)break;
+    }
+    if(buffer.trim())consume(buffer);
+}
+
 async function reviewFile() {
     const input=document.getElementById('review-upload'), file=input.files[0]; if(!file)return;
     showView(currentUser.role==='student'?'precheck':'chat');
     const progress=document.getElementById('review-progress');
-    progress.classList.remove('hidden'); progress.innerHTML='<span class="loading-dots">正在识别材料类型、抽取事实并执行规则校验 </span>';
+    progress.classList.remove('is-error');
+    const state={filename:file.name,startedAt:Date.now(),progress:2,message:'正在上传材料',detail:'',steps:{}};
+    progress.classList.remove('hidden');renderReviewLive(progress,state);
+    const timer=setInterval(()=>renderReviewLive(progress,state),1000);
     const form=new FormData(); form.append('file',file);
     try {
-        const data=await api('/review',{method:'POST',body:form});
-        if(!data.review_result)throw new Error(data.error||'审查没有返回结果');
-        progress.innerHTML=`完成：${esc(data.review_result.审查结论)}，综合评分 ${esc(data.review_result.总评分 ?? '—')}`;
+        let result=null,streamError='';
+        const response=await fetch('/review/stream',{method:'POST',body:form});
+        await readReviewStream(response,event=>{
+            applyReviewEvent(progress,state,event);
+            if(event.stage==='complete')result=event.review_result;
+            if(event.stage==='error')streamError=event.message||'审查失败';
+        });
+        if(!result)throw new Error(streamError||'审查没有返回结果');
+        state.progress=100;state.message=`审查完成：${result.审查结论}`;state.detail=`综合评分 ${result.总评分 ?? '—'} 分`;
+        reviewStageMeta.forEach(([key])=>{if(state.steps[key]?.status!=='warning')state.steps[key]={...state.steps[key],status:'done'};});
+        renderReviewLive(progress,state);
         await loadReviewHistory();
-        openReviewReport(data.review_result.记录ID, data.review_result, file.name);
-    } catch(err){ progress.textContent=err.message||'审查失败'; toast(progress.textContent,'error'); }
-    finally{input.value='';}
+        openReviewReport(result.记录ID,result,file.name);
+    } catch(err){
+        state.message=err.message||'审查失败';state.detail='请检查网络或模型服务后重试';state.error=true;
+        progress.classList.add('is-error');renderReviewLive(progress,state);toast(state.message,'error');
+    } finally{clearInterval(timer);input.value='';}
 }
 
 async function loadReviewHistory() {

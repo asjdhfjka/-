@@ -12,6 +12,7 @@ import threading
 import time
 import uuid
 from collections import OrderedDict
+from contextvars import ContextVar
 import httpx
 
 import config
@@ -702,18 +703,28 @@ from langchain_core.documents import Document
 print("正在构建 BM25 关键词索引...")
 # 1. 从 Chroma 里把已入库的所有片段读出来，用于构建 BM25 内存索引
 all_data = vector_db.get()
-if all_data and all_data.get('documents'):
-    all_docs = [
-        Document(page_content=text, metadata=meta)
-        for text, meta in zip(all_data['documents'], all_data['metadatas'])
-    ]
-else:
-    all_docs = []
-print(f"✅ BM25 索引准备就绪，共 {len(all_docs)} 个片段")
+all_docs = [
+    Document(page_content=text, metadata=meta or {})
+    for text, meta in zip(
+        (all_data or {}).get('documents') or [],
+        (all_data or {}).get('metadatas') or [],
+    )
+] if all_data else []
 
 # 2. BM25 关键词检索器（擅长“GXzhcx”、“教务处”等专有名词）
-bm25_retriever = BM25Retriever.from_documents(all_docs)
-bm25_retriever.k = config.RETRIEVE_BM25_K
+# 【修复】空知识库时 BM25Retriever.from_documents([]) 会抛
+#   ValueError: not enough values to unpack (expected 3, got 0)
+# 后果不是「搜不到」而是「服务根本起不来」—— 而空库恰好是每个新环境的
+# 第一次启动状态（刚 clone、还没上传任何语料），所以这条路上所有新用户必撞。
+# 现在空库时留 None 占位，hybrid_search 跳过关键词这一路；
+# 上传第一份文档后，rebuild_bm25_index() 会自动把它补上。
+if all_docs:
+    bm25_retriever = BM25Retriever.from_documents(all_docs)
+    bm25_retriever.k = config.RETRIEVE_BM25_K
+    print(f"✅ BM25 索引准备就绪，共 {len(all_docs)} 个片段")
+else:
+    bm25_retriever = None
+    print("⚠️ 知识库为空，暂不建立 BM25 索引（上传第一份文档后自动建立）")
 
 # 3. 向量语义检索器（擅长“怎么交学费”这类模糊语义）
 vector_retriever = vector_db.as_retriever(search_kwargs={"k": config.RETRIEVE_VECTOR_K})
@@ -727,8 +738,8 @@ def hybrid_search(query: str, search_filter: dict = None):
     else:
         vector_docs = vector_retriever.invoke(query)
 
-    # 2. BM25 检索
-    bm25_docs = bm25_retriever.invoke(query)
+    # 2. BM25 检索（空知识库时 bm25_retriever 为 None，关键词这一路直接跳过）
+    bm25_docs = bm25_retriever.invoke(query) if bm25_retriever else []
     if search_filter:
         allowed = search_filter.get("topic")
         bm25_docs = [d for d in bm25_docs if d.metadata.get("topic") == allowed]
@@ -824,8 +835,24 @@ print("向量数据库加载完成！")
 #大管家（app），如果外面有人用 POST 方式，敲门牌是 /chat 的这扇门，你就去执行下面这个叫 chat 的函数。
 async def chat(user_input: str, user: dict = Depends(require_user)):
     # 3. 调用大模型
-    response = await llm_chat(user_input, "直答", temperature=config.TEMPERATURE_GENERATE)
-    reply = response.choices[0].message.content
+    # 【修复】这里原来既没有异常处理，也没有传 timeout —— 于是取 TIMEOUT_AUX(15s)。
+    # 但推理型模型的直答耗时紧贴这个上限（实测同题三次：9.8s / 12.9s / 15.0s 超时），
+    # 一旦超时就是 APITimeoutError 冒到框架层，客户端收到 500 Internal Server Error，
+    # 用户以为系统坏了。现在与 /chat/stream 对齐用 TIMEOUT_GENERATE，并把失败
+    # 转成可读的 503，方便前端提示「稍后重试」。
+    try:
+        response = await llm_chat(user_input, "直答",
+                                  temperature=config.TEMPERATURE_GENERATE,
+                                  timeout=config.TIMEOUT_GENERATE)
+        reply = response.choices[0].message.content
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"⚠️ /chat 直答失败: {type(e).__name__}: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail="模型服务暂时没有响应，请稍后重试（与文件、账号无关）",
+        ) from e
     _record_chat_safe(user, user_input, reply, [])
     return {"reply": reply}
 #拆包：从大模型返回的一坨复杂对象里，精准提取出回答文字：
@@ -997,7 +1024,9 @@ async def chat_stream(user_input: str, history: str = "",
             print(f"❌ 大模型调用失败: {e}")
             yield "抱歉，网络请求超时或服务暂时不可用。"
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    return StreamingResponse(
+        event_generator(), media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 @app.get("/stats")
@@ -1175,8 +1204,17 @@ async def maybe_extract_rules(filename: str, chunks: list) -> dict:
     known_domains = domain_catalog(domain_cfg, rules_snapshot)
     domain_prompt = prompts.domain_identify_prompt(
         filename, chunks[0].page_content[:800], known_domains)
-    domain_res = await llm_chat(domain_prompt, "领域识别", temperature=config.TEMPERATURE_JUDGE)
-    raw_domain = domain_res.choices[0].message.content.strip()
+    # 领域识别失败不该让整次上传失败：这一环节只是给草稿归个类。
+    # 但原实现没有 try —— 推理型模型偶发超过 TIMEOUT_AUX(15s) 时异常会一路冒泡到
+    # /upload 的兜底分支，用户看到的是「文件解析失败，可能格式不正确或编码有问题」，
+    # 于是会去反复另存文件格式，永远找不到真正原因（实为模型超时）。
+    try:
+        domain_res = await llm_chat(domain_prompt, "领域识别",
+                                    temperature=config.TEMPERATURE_JUDGE)
+        raw_domain = domain_res.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"   ⚠️ 领域识别失败（不影响文档入库）：{type(e).__name__}: {e}")
+        raw_domain = ""
     matched_domain = normalize_import_domain(raw_domain, domain_cfg, rules_snapshot)
     if matched_domain != raw_domain:
         print(f"   🔁 导入领域归一：【{raw_domain}】→【{matched_domain}】")
@@ -1324,8 +1362,16 @@ async def upload_file(file: UploadFile = File(...),
     except ValueError as e:
         return {"error": f"❌ {e}"}
     except Exception as e:
-        print(f"❌ 解析文件失败: {e}")
-        return {"error": "文件解析失败，可能格式不正确或编码有问题"}
+        # 【修复】原来这里一律回「文件解析失败，可能格式不正确或编码有问题」，
+        # 但实测最常见的失败原因是**模型调用超时**，与文件格式毫无关系 ——
+        # 用户会去反复另存文件格式，永远定位不到真正原因。
+        # 另外：文档写入向量库发生在规则抽取环节之前，所以走到这里时内容
+        # 往往**已经入库成功**，只是后续环节抛错；报「失败」会让用户重复上传，
+        # 第二次又因「内容已存在」走另一条分支，观感上像随机失败。
+        print(f"❌ 上传处理失败: {type(e).__name__}: {e}")
+        return {"error": f"❌ 上传处理失败（{type(e).__name__}）。"
+                         f"若原因是模型超时，文档通常已入库，刷新页面即可检索到；"
+                         f"若反复失败，请看服务端日志确认具体环节"}
     finally:
         # 临时文件用完即删（data/ 里已留档一份）
         if os.path.exists(file_location):
@@ -1500,6 +1546,21 @@ async def publish_rule_draft_batch(batch_id: str, payload: dict = None,
     }
 
 
+REVIEW_PROGRESS_CALLBACK = ContextVar("review_progress_callback", default=None)
+
+
+async def emit_review_progress(stage: str, progress: int, message: str, **details):
+    """向当前请求的 SSE 通道汇报真实审核步骤。普通接口调用时为空操作。"""
+    callback = REVIEW_PROGRESS_CALLBACK.get()
+    if callback:
+        await callback({
+            "stage": stage,
+            "progress": progress,
+            "message": message,
+            **details,
+        })
+
+
 @app.post("/review")
 async def review_file(file: UploadFile = File(...), user: dict = Depends(require_user)):
     """材料审查：识别领域与子类型 → 路由规则 → 抽事实 → 硬规则 + 软审查 → 评分。"""
@@ -1514,10 +1575,13 @@ async def review_file(file: UploadFile = File(...), user: dict = Depends(require
 
     try:
         # ========== 1. 读取待审材料 ==========
+        await emit_review_progress("parse", 6, "材料已接收，正在解析文字与图片")
         documents = load_documents(file_location, file.filename)
         doc_content = "\n".join([d.page_content for d in documents])
         if not doc_content.strip():
             return {"error": "❌ 未从材料中解析出任何文字"}
+        await emit_review_progress(
+            "parse", 18, "材料解析完成", detail=f"已读取 {len(doc_content)} 个字符")
 
         # 先读取规则库，用配置领域与动态规则领域的并集指导类型识别。
         if not os.path.exists(config.RULES_FILE):
@@ -1529,8 +1593,10 @@ async def review_file(file: UploadFile = File(...), user: dict = Depends(require
 
         # ========== 2. 识别材料类型（领域 + 子类型） ==========
         print("⏳ 正在识别材料类型...")
+        await emit_review_progress("identify", 24, "正在识别材料类型")
         domain_prompt = prompts.review_identify_prompt(doc_content, known_domains)
         key_fields = []
+        identify_warning = None
         try:
             domain_info = await review_json_call(
                 domain_prompt, "材料类型识别", temperature=config.TEMPERATURE_JUDGE)
@@ -1541,8 +1607,14 @@ async def review_file(file: UploadFile = File(...), user: dict = Depends(require
         except Exception as e:
             print(f"⚠️ 领域识别解析失败: {e}")
             matched_domain, matched_scene = "通用审查", "通用"
+            identify_warning = "类型识别异常，已按通用材料继续审查"
 
         print(f"✅ 识别到领域：【{matched_domain}】，子类型：【{matched_scene}】")
+        await emit_review_progress(
+            "identify", 35, f"识别为{matched_domain} · {matched_scene}",
+            detail=identify_warning or "材料类型识别完成",
+            domain=matched_domain, scene=matched_scene,
+            status="warning" if identify_warning else "done")
 
         # ========== 3. 使用统一领域目录路由规则 ==========
         # 【修复】领域名归一：规则库的领域名来自「上传规章时」的识别，这里是
@@ -1553,6 +1625,9 @@ async def review_file(file: UploadFile = File(...), user: dict = Depends(require
         if resolved_domain != matched_domain:
             print(f"   🔁 领域名归一：【{matched_domain}】→【{resolved_domain}】")
         print(f"✅ 最终匹配到 {len(matched_rules)} 条规则")
+        await emit_review_progress(
+            "rules", 43, f"已匹配 {len(matched_rules)} 条审查规则",
+            detail=f"适用领域：{resolved_domain}", rule_count=len(matched_rules))
 
         # ========== 4. 动态事实抽取 ==========
         print("⏳ 正在抽取事实清单（动态 schema）...")
@@ -1576,19 +1651,47 @@ async def review_file(file: UploadFile = File(...), user: dict = Depends(require
 
         # 事实抽取和软审查互不依赖，并行请求可避免两个 60 秒上限串行累加。
         print("⏳ 正在并行执行事实抽取与软审查...")
-        fact_call = review_json_call(
-            prompts.fact_extract_prompt(doc_content, schema_str),
-            "事实抽取", temperature=config.TEMPERATURE_JUDGE,
-            model=config.FACT_MODEL, max_tokens=config.FACT_MAX_TOKENS,
-            validator=lambda value: validate_fact_extraction(value, required_fields),
-            json_schema=build_fact_json_schema(required_fields))
-        soft_call = review_json_call(
-            prompts.soft_review_prompt(doc_content),
-            "软性审查", temperature=config.TEMPERATURE_JUDGE,
-            model=config.SOFT_REVIEW_MODEL, max_tokens=config.SOFT_REVIEW_MAX_TOKENS,
-            validator=validate_soft_review)
+        await emit_review_progress(
+            "analysis", 48, "事实抽取与材料质量审查正在并行执行",
+            detail=f"需要提取 {len(required_fields)} 个关键字段")
+
+        async def fact_call():
+            try:
+                value = await review_json_call(
+                    prompts.fact_extract_prompt(doc_content, schema_str),
+                    "事实抽取", temperature=config.TEMPERATURE_JUDGE,
+                    model=config.FACT_MODEL, max_tokens=config.FACT_MAX_TOKENS,
+                    validator=lambda item: validate_fact_extraction(item, required_fields),
+                    json_schema=build_fact_json_schema(required_fields))
+                await emit_review_progress(
+                    "facts", 66, "事实清单提取完成",
+                    detail=f"已整理 {len(required_fields)} 个关键字段")
+                return value
+            except Exception as exc:
+                await emit_review_progress(
+                    "facts", 66, "事实抽取未完成，相关规则将待人工核验",
+                    detail=str(exc)[:160], status="warning")
+                raise
+
+        async def soft_call():
+            try:
+                value = await review_json_call(
+                    prompts.soft_review_prompt(doc_content),
+                    "软性审查", temperature=config.TEMPERATURE_JUDGE,
+                    model=config.SOFT_REVIEW_MODEL, max_tokens=config.SOFT_REVIEW_MAX_TOKENS,
+                    validator=validate_soft_review)
+                await emit_review_progress(
+                    "soft", 72, "材料质量审查完成",
+                    detail="完整性、规范性和表达质量已分析")
+                return value
+            except Exception as exc:
+                await emit_review_progress(
+                    "soft", 72, "材料质量审查未完成",
+                    detail=str(exc)[:160], status="warning")
+                raise
+
         fact_outcome, soft_outcome = await asyncio.gather(
-            fact_call, soft_call, return_exceptions=True)
+            fact_call(), soft_call(), return_exceptions=True)
 
         fact_error = None
         if isinstance(fact_outcome, Exception):
@@ -1609,6 +1712,7 @@ async def review_file(file: UploadFile = File(...), user: dict = Depends(require
 
         # ========== 5. 硬规则校验 ==========
         print("⏳ 正在执行硬规则校验...")
+        await emit_review_progress("hard_rules", 78, "正在执行硬规则校验")
         hard_results = execute_hard_rules(facts, matched_rules)
         pending_results = [r for r in hard_results if r.get("needs_review")]
         applicable = [r for r in hard_results
@@ -1617,8 +1721,12 @@ async def review_file(file: UploadFile = File(...), user: dict = Depends(require
         print(f"✅ 硬规则：{passed_count}/{len(applicable)} 已核验通过，"
               f"{len(pending_results)} 条待核验，"
               f"{sum(1 for r in hard_results if r.get('not_applicable'))} 条不适用")
+        await emit_review_progress(
+            "hard_rules", 87, "硬规则校验完成",
+            detail=f"{passed_count} 条通过，{len(pending_results)} 条待核验")
 
         # ========== 6. 综合评分 ==========
+        await emit_review_progress("report", 92, "正在汇总评分与修改建议")
         total_score, grade, score_detail = compute_score(hard_results, soft_result)
         print(f"   💯 硬规则扣分：致命 {score_detail['critical']} × 30 + "
               f"严重 {score_detail['error']} × 10 + 建议 {score_detail['warning']} × 3 "
@@ -1689,6 +1797,9 @@ async def review_file(file: UploadFile = File(...), user: dict = Depends(require
                 if archived_path and os.path.exists(archived_path):
                     os.remove(archived_path)
                 print(f"⚠️ 审查记录保存失败: {history_exc}")
+        await emit_review_progress(
+            "report", 97, "审查报告已生成",
+            detail=f"结论：{grade}，综合评分 {total_score}")
         return {"review_result": review_result}
 
     except ValueError as e:
@@ -1699,6 +1810,81 @@ async def review_file(file: UploadFile = File(...), user: dict = Depends(require
     finally:
         if os.path.exists(file_location):
             os.remove(file_location)
+
+
+@app.post("/review/stream")
+async def review_file_stream(file: UploadFile = File(...),
+                             user: dict = Depends(require_user)):
+    """以 SSE 推送实际审核进度，最后一个事件携带完整审查报告。"""
+    # StreamingResponse 在路由函数返回后才消费生成器，因此先把上传内容安全落盘，
+    # 避免原始 UploadFile 在长时间模型调用期间被请求生命周期提前关闭。
+    try:
+        source_location, _ = await save_upload(file, config.REVIEW_MAX_MB)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    source_handle = open(source_location, "rb")
+    stream_file = UploadFile(file=source_handle, filename=file.filename)
+
+    async def event_generator():
+        queue = asyncio.Queue()
+
+        async def publish(event):
+            await queue.put(event)
+
+        async def worker():
+            token = REVIEW_PROGRESS_CALLBACK.set(publish)
+            try:
+                payload = await review_file(stream_file, user)
+                if payload.get("review_result"):
+                    await queue.put({
+                        "stage": "complete",
+                        "progress": 100,
+                        "message": "材料审查完成",
+                        "review_result": payload["review_result"],
+                    })
+                else:
+                    await queue.put({
+                        "stage": "error",
+                        "message": payload.get("error", "审查没有返回结果"),
+                    })
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                print(f"❌ 流式审查失败: {exc}")
+                await queue.put({
+                    "stage": "error",
+                    "message": f"审查失败：{exc}",
+                })
+            finally:
+                REVIEW_PROGRESS_CALLBACK.reset(token)
+                await queue.put(None)
+
+        task = asyncio.create_task(worker())
+        try:
+            while True:
+                try:
+                    event = await asyncio.wait_for(queue.get(), timeout=12)
+                except asyncio.TimeoutError:
+                    # 长模型调用期间保持连接活跃；前端的已用时间会继续更新。
+                    yield ": keep-alive\n\n"
+                    continue
+                if event is None:
+                    break
+                yield f"data: {json.dumps(event, ensure_ascii=False, default=str)}\n\n"
+        finally:
+            if not task.done():
+                task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
+            source_handle.close()
+            if os.path.exists(source_location):
+                os.remove(source_location)
+
+    return StreamingResponse(
+        event_generator(), media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 @app.get("/preview/{filename:path}")

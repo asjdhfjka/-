@@ -26,7 +26,11 @@ QUESTIONS = [
 
 def bench(label, vec_k, bm25_k, pool, rounds=3):
     main.vector_retriever.search_kwargs["k"] = vec_k
-    main.bm25_retriever.k = bm25_k
+    # 空知识库时 main.bm25_retriever 为 None（见 main.py 的启动保护）
+    if main.bm25_retriever is not None:
+        main.bm25_retriever.k = bm25_k
+    else:
+        print("⚠️ 知识库为空，跳过 BM25 参数调整")
     config.RERANK_POOL = pool
 
     main.hybrid_search(QUESTIONS[0])          # 预热
